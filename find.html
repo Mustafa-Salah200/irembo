@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Find my application · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/fonts.css?v=3">
-<link rel="stylesheet" href="css/site.css?v=3">
-<script src="js/theme.js?v=3"></script>
+<link rel="stylesheet" href="css/fonts.css?v=5">
+<link rel="stylesheet" href="css/site.css?v=5">
+<script src="js/theme.js?v=5"></script>
 </head>
 <body data-page="find">
 <div id="site-header"></div>
@@ -15,7 +15,7 @@
 <div class="cols">
   <div class="main">
     <div class="crumbs"><a href="index.html">Home</a><span>/</span><span>Find application</span></div>
-    <div><h1>Find my application</h1><p class="lead">No login needed. Use whichever number you have.</p></div>
+    <div><h1>Find my application</h1><p class="lead">Check the status with your application number or payment code. To see all your applications, use your phone number: we send you a code by SMS.</p></div>
     <form class="card" id="findForm" novalidate>
       <div class="f" data-f="q">
         <label for="q" style="font-size:1.0625rem">Application number, payment code (Bill ID) or phone number</label>
@@ -26,29 +26,41 @@
       </div>
     </form>
     <div id="findRes" class="stack" style="gap:10px" aria-live="polite"></div>
-    <details class="acc card tight" style="padding:18px 22px"><summary style="color:var(--brand-text)">I lost my application number</summary><p>Search with the phone number you used. You can also call 9099 or visit an Irembo agent with your passport.</p></details>
+    <details class="acc card tight" style="padding:18px 22px"><summary style="color:var(--brand-text)">Why do you ask for a code?</summary><p>An application number is printed on SMS and receipts, so other people may see it. With the number alone you can only see the status and pay. To see personal details or change anything, the code we send to the phone in the application proves it's you.</p></details>
+    <details class="acc card tight" style="padding:18px 22px"><summary style="color:var(--brand-text)">I lost my application number</summary><p>Search with the phone number you used: we send you a code by SMS and then show all your applications. You can also call 9099 or visit an Irembo agent with your passport.</p></details>
   </div>
   <aside id="side"></aside>
 </div>
 </main>
 <div id="site-footer"></div>
-<script src="js/core.js?v=3"></script>
+<script src="js/core.js?v=5"></script>
 <script>
-$('#side').innerHTML=sidePanel(null);
-function result(a){
-  const s=statusOf(a), fee=rwf(feeOf(a)), v=VISA[a.app.visa];
-  const what = s==='Draft' ? `Not submitted yet. Continue where you stopped.`
-             : s==='Payment pending' ? `Pay ${fee} before ${fmtDate(a.deadline)}. If the code expires, your application is kept.`
-             : s==='Payment expired' ? `The payment code expired. Your application is safe: get a new code and pay.`
-             : `Paid. DGIE is reviewing your request (usually 4 working days).`;
+setSide(sidePanel(null));
+
+/* status only: what anyone who knows the number may see (no name, no details) */
+function statusCard(a){
+  const s=statusOf(a), v=VISA[a.app.visa];
+  const what = s==='Draft' ? 'Not submitted yet.'
+             : s==='Payment pending' ? `Waiting for payment of ${rwf(feeOf(a))} before ${fmtDate(a.deadline)}. If the code expires, the application is kept.`
+             : s==='Payment expired' ? 'The payment code expired. The application is safe: a new code can be created.'
+             : 'Paid. DGIE is reviewing the request (usually 4 working days).';
+  const pay = (s==='Payment pending'||s==='Payment expired') ? `<a class="btn small" href="application.html?no=${a.no}">${s==='Payment expired'?'Get a new code and pay':'Pay now'}</a>` : '';
+  const more = s==='Draft' ? `<a class="btn sec small" href="apply.html?no=${a.no}">Continue (needs SMS code)</a>`
+                           : `<a class="btn sec small" href="application.html?no=${a.no}">See details</a>`;
+  return `<div class="result"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''}</span><span class="s mono">${a.no}</span><span class="s" style="margin-top:4px">${what}</span></span>${tag(s)}<span class="acts">${pay}${more}</span></div>
+    <div class="lockline" style="font-size:.875rem"><span style="display:flex;gap:10px;align-items:center"><img src="assets/icons/lock.svg" alt="">Personal details are hidden. To see them or change anything, you'll confirm with a code sent to the phone in the application.</span></div>`;
+}
+/* full result: only after the phone owner has entered the SMS code */
+function fullCard(a){
+  const s=statusOf(a), v=VISA[a.app.visa];
   const href = s==='Draft' ? `apply.html?no=${a.no}` : `application.html?no=${a.no}`;
   const go = s==='Draft' ? 'Continue →' : s==='Payment pending' ? 'Pay now →' : s==='Payment expired' ? 'Get a new code →' : 'Open →';
-  return `<a class="result" href="${href}"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''}</span><span class="s mono">${a.no}</span><span class="s" style="margin-top:4px">${what}</span></span>${tag(s)}<span class="go">${go}</span></a>`;
+  return `<a class="result" href="${href}"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''}</span><span class="s mono">${a.no} · ${esc(a.app.given||'')} ${esc(a.app.surname||'')}</span></span>${tag(s)}<span class="go">${go}</span></a>`;
 }
 function setErr(msg){ $('[data-f=q]').classList.toggle('err',!!msg); $('#q-m').textContent=msg; }
 $('#q').addEventListener('input',()=>setErr(''));
 $('#findForm').addEventListener('submit',e=>{
-  e.preventDefault();
+  e.preventDefault(); hideSms();
   const q=$('#q').value.trim(), c=q.replace(/[\s-]/g,'').toUpperCase(), box=$('#findRes');
   const isApp=/^B2\d{8}$/.test(c), isBill=/^88\d{7}$/.test(c), isPhone=/^(0|250|\+250)?7[2389]\d{7}$/.test(c);
   const msg = !q ? 'Type your application number, payment code or phone number.'
@@ -57,10 +69,23 @@ $('#findForm').addEventListener('submit',e=>{
             : c.startsWith('88') ? 'Payment codes (Bill IDs) start with 88 and have 9 digits.'
             : 'We could not recognise this. Check the examples above.';
   setErr(msg); if(msg){ box.innerHTML=''; $('#q').focus(); return; }
-  const phone=c.replace(/^(\+?250|0)/,'');
-  const hits=Store.all().filter(a=> isApp ? a.no.replace(/-/g,'')===c : isBill ? (a.billId||'').replace(/\s/g,'')===c : a.app.phone===phone);
-  box.innerHTML = hits.length ? `<div class="muted" style="font-size:.875rem">${hits.length} application${hits.length>1?'s':''} found</div>`+hits.map(result).join('')
-    : `<div class="infobox">No application found for <strong>${esc(q)}</strong>. Check the number in your SMS, or call <strong>9099</strong>.</div>`;
+
+  if(isPhone){
+    /* never list applications for a phone number on screen without proof: send a code to that phone */
+    const phone=c.replace(/^(\+?250|0)/,'');
+    const showList=()=>{
+      const hits=Store.all().filter(a=>a.app.phone===phone);
+      box.innerHTML = hits.length ? `<div class="muted" style="font-size:.875rem">${hits.length} application${hits.length>1?'s':''} for ${maskPhone(phone)}</div>`+hits.map(fullCard).join('')
+                                  : `<div class="infobox">There are no applications for ${maskPhone(phone)}.</div>`;
+    };
+    if(phoneVerified(phone)) return showList();
+    box.innerHTML='<div id="gate"></div>';
+    verifyBox($('#gate'), phone, {title:'See all your applications', why:'see the applications linked to this phone number', onOk:showList});
+    return;
+  }
+  const hit=Store.all().find(a=> isApp ? a.no.replace(/-/g,'')===c : (a.billId||'').replace(/\s/g,'')===c);
+  box.innerHTML = hit ? (canAccess(hit) ? fullCard(hit) : statusCard(hit))
+    : `<div class="infobox">No application found for <strong>${esc(q)}</strong>. Check the number in your SMS, search with your phone number, or call <strong>9099</strong>.</div>`;
 });
 if(param('q')){ $('#q').value=param('q'); $('#findForm').requestSubmit(); }
 </script>

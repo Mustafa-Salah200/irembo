@@ -34,3 +34,10 @@ Applications are stored in the browser (`localStorage`) and never sent anywhere.
 
 ## Limits (be honest in the report)
 Fees, photo rules, the USSD code and the agent list are **sample data**. Only English is built (RW/FR show a "coming soon" message). Services other than Renew visa link to the current irembo.gov.rw. It has not been tested with real users yet (PENDING, Evaluation Lead). Do not remove the footer disclaimer if you host it: an unofficial page that looks like a government portal and asks for passport data can be mistaken for phishing.
+
+## Access control (who may see or change an application)
+Knowing an application number is not enough:
+- **Application number or Bill ID:** shows the status only (no name, no details). Paying is allowed, because paying someone else's fee does them no harm.
+- **Phone number, seeing details or the receipt, continuing a draft, changing answers:** a 6-digit code is sent by SMS to the phone in the application. It is valid for 5 minutes, allows 3 tries, and unlocks for 30 minutes.
+- The person who started an application in the same browser session needs no code. Closing the browser, or **My applications > Sign out on this device**, locks it again (for cyber cafes and agents).
+- **SMS is simulated:** the code appears in a message box at the top right. A real system would also use long random application numbers and limit how many searches someone can make.

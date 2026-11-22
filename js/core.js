@@ -103,6 +103,87 @@ function modal(html){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') $$('.scrim').forEach(s=>s.remove()); });
 
+/* =====================================================================
+   ACCESS CONTROL — knowing an application number is NOT enough.
+   - Status can be looked up with the application number or Bill ID (no
+     personal details shown).
+   - Seeing personal details / receipt, continuing a draft, changing answers
+     or listing applications by phone needs a 6-digit code sent by SMS to the
+     phone number in the application.
+   - The person who started an application in this browser session doesn't
+     need a code. Closing the browser (or "Sign out on this device") locks it.
+   - Paying stays open: paying someone's fee does them no harm.
+   SMS is SIMULATED in this prototype: the message appears on screen.
+   ===================================================================== */
+const SESS_KEY='irembogov-session';
+const UNLOCK_MIN=30, CODE_MIN=5, CODE_TRIES=3;
+function sess(){ try{ const s=JSON.parse(sessionStorage.getItem(SESS_KEY)); return s&&Array.isArray(s.own)&&s.phones ? s : {own:[],phones:{}}; }catch(e){ return {own:[],phones:{}}; } }
+function saveSess(s){ try{ sessionStorage.setItem(SESS_KEY, JSON.stringify(s)); }catch(e){} }
+function markOwn(no){ const s=sess(); if(!s.own.includes(no)){ s.own.push(no); saveSess(s); } }
+function phoneVerified(phone){ const t=sess().phones[phone]; return !!t && t>Date.now(); }
+function canAccess(a){
+  if(!a) return false;
+  if(sess().own.includes(a.no)) return true;   // started in this browser session
+  if(!a.app.phone) return true;                // no phone yet: nothing to verify against, nothing personal entered
+  return phoneVerified(a.app.phone);
+}
+function signOutDevice(){ try{ sessionStorage.removeItem(SESS_KEY); }catch(e){} }
+function maskName(a){
+  const g=(a.app.given||'').trim(), s=(a.app.surname||'').trim();
+  return [g?g[0]+'.':'', s?s[0]+'•'.repeat(Math.max(3,s.length-1)):''].filter(Boolean).join(' ') || '—';
+}
+
+/* simulated SMS, shown like a phone notification */
+function showSms(phone, text){
+  hideSms();
+  const d=document.createElement('div'); d.className='sms'; d.setAttribute('role','status');
+  d.innerHTML=`<button class="x" aria-label="Close message">×</button>
+    <div class="sh">${ICO('chat')}<span>Messages · now</span></div>
+    <div class="from">IREMBO</div><div class="body">${text}</div>
+    <div class="note">Simulated SMS to ${maskPhone(phone)} · prototype, no real SMS is sent</div>`;
+  d.querySelector('.x').onclick=hideSms;
+  document.body.appendChild(d);
+}
+function hideSms(){ $$('.sms').forEach(s=>s.remove()); }
+
+/* "Confirm it's you" box: sends a code to `phone`, calls onOk() when the right code is typed */
+function verifyBox(el, phone, {why, title="Confirm it's you", onOk, back=''}){
+  let code=null, exp=0, tries=CODE_TRIES;
+  const send=()=>{
+    code=String(100000+rnd(900000)); exp=Date.now()+CODE_MIN*60000; tries=CODE_TRIES;
+    showSms(phone, `IremboGov: your code is <b>${code}</b>. It expires in ${CODE_MIN} minutes. Never share this code, not even with an agent.`);
+    draw(true);
+  };
+  const draw=(sent, msg='')=>{
+    el.innerHTML=`<div class="card verify">
+      <div class="vh"><span class="tile36"><img src="assets/icons/lock.svg" alt=""></span><h2 style="margin:0">${title}</h2></div>
+      <p style="margin:0;color:var(--ink2)">To ${why}, we send a 6-digit code by SMS to <strong style="color:var(--ink)">${maskPhone(phone)}</strong>. Only the owner of that phone can continue, so nobody else can use your application number.</p>
+      ${sent ? `<div class="f${msg?' err':''}" data-f="otp" style="max-width:320px">
+          <label for="otp">Code from the SMS</label>
+          <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digits" class="mono" style="font-size:1.25rem;letter-spacing:.2em">
+          <div class="msg">${msg}</div></div>
+        <div class="actions" style="justify-content:flex-start;padding-top:0"><button class="btn" id="vOk" ${tries<=0?'disabled':''}>Confirm</button><button class="btn link" id="vResend">Send a new code</button></div>`
+      : `<div><button class="btn" id="vSend">Send code by SMS</button></div>`}
+      <p class="note" style="margin:0">Lost this phone or changed number? Visit an <a href="help.html#agents">Irembo agent</a> with your passport, or call 9099.</p>
+      ${back}
+    </div>`;
+    el.querySelector('#vSend')?.addEventListener('click', send);
+    el.querySelector('#vResend')?.addEventListener('click', send);
+    const inp=el.querySelector('#otp');
+    if(inp){ inp.focus(); inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); }); }
+    el.querySelector('#vOk')?.addEventListener('click', check);
+  };
+  const check=()=>{
+    const v=(el.querySelector('#otp').value||'').replace(/\D/g,'');
+    if(Date.now()>exp) return draw(true,'This code has expired. Press "Send a new code".');
+    if(v!==code){ tries--; return draw(true, tries>0 ? `That code is not right. ${tries} tr${tries>1?'ies':'y'} left.` : 'Too many wrong codes. Press "Send a new code".'); }
+    const s=sess(); s.phones[phone]=Date.now()+UNLOCK_MIN*60000; saveSess(s);
+    hideSms(); toast('✓ Confirmed. You can see and change your applications for the next 30 minutes.');
+    onOk();
+  };
+  draw(false);
+}
+
 /* ---------- page containers (tolerant of an older cached page) ---------- */
 function flowEl(){ return $('#flow') || $('#main'); }
 function setSide(html){ const s=$('#side'); if(s) s.innerHTML=html; }

@@ -40,6 +40,8 @@ function render(){
     setSide(sidePanel(null)); return;
   }
   const s=statusOf(A), fee=feeOf(A);
+  const full=canAccess(A);           // owner (started here, or confirmed with the SMS code)
+  const lockline = what => `<div class="lockline noprint"><span style="display:flex;gap:10px;align-items:center"><img src="assets/icons/lock.svg" alt="">${what}</span><button class="btn sec small" id="unlock">Confirm it's you</button></div>`;
   let h='';
 
   if(s==='Payment pending'){
@@ -56,13 +58,13 @@ function render(){
         <div><div class="k">Pay before</div><div style="font-weight:700">${fmtDate(A.deadline)}</div></div>
         <span class="pill warn" aria-label="Time left">${timeLeft(A.deadline)}</span>
       </div>
-      <div class="bot">Payment code (Bill ID) <strong>${A.billId}</strong> is linked to your application number <strong>${A.no}</strong>. No need to write it down.</div>
+      <div class="bot">Payment code (Bill ID) <strong>${A.billId}</strong> is linked to your application number <strong>${A.no}</strong>. No need to write it down.<br>Applicant: <strong style="font-family:inherit">${full?`${esc(A.app.given)} ${esc(A.app.surname)}`:maskName(A)}</strong></div>
     </div>
     <fieldset class="f" style="gap:12px"><legend><h2 style="margin:0;font-size:1.25rem">How do you want to pay?</h2></legend>
       <div class="methods">${METHODS.map(([id,n,hint,ic])=>`<label class="opt"><input type="radio" name="method" value="${id}" ${A.method===id?'checked':''}><span class="radio"></span><span class="ot"><span class="on" style="font-size:1rem">${n}</span><span class="od" style="color:var(--ink3)">${hint}</span></span><img class="oi" src="assets/icons/${ic}.svg" alt=""></label>`).join('')}</div>
     </fieldset>
     <label class="check plain"><input type="checkbox" id="remind" ${A.sms!==false?'checked':''}><span class="box"></span><span><span class="st">Remind me by SMS 2 days before the deadline</span><span class="sh">So my application isn't delayed if I pay later</span></span></label>
-    <div class="actions"><a class="btn sec" href="apply.html?no=${A.no}#step-4">← Change my answers</a>
+    <div class="actions">${full?`<a class="btn sec" href="apply.html?no=${A.no}#step-4">← Change my answers</a>`:`<button class="btn sec" id="unlock">← Change my answers</button>`}
       <div class="right"><a class="btn link" href="my-applications.html" id="later">Pay later, I'll use the reminder</a><button class="btn" id="payBtn">Pay ${rwf(fee)}</button></div></div>
     <div class="card"><h2 style="font-size:1.25rem">Where is my application?</h2>${timeline(s)}</div>`;
   }
@@ -79,9 +81,10 @@ function render(){
     if(justPaid) h+=`<div class="okbox" role="status"><strong>✓ Payment received.</strong> Receipt sent by SMS to ${maskPhone(A.app.phone)}. DGIE will now review your request.</div>`;
     h+=`<div><div class="titlerow"><h1>Renew visa</h1>${tag(s)}</div><p style="margin:0;color:var(--ink2)">Application <strong class="mono" style="color:var(--ink)">${A.no}</strong> · handled by DGIE</p></div>
     <div class="card"><h2 style="font-size:1.25rem">Where is my application?</h2>${timeline(s)}</div>
-    <div class="card receipt"><div class="headrow" style="margin-bottom:14px"><h2 style="font-size:1.25rem">Payment receipt</h2><button class="btn sec small noprint" onclick="window.print()">Print / save as PDF</button></div>
+    ${full ? `<div class="card receipt"><div class="headrow" style="margin-bottom:14px"><h2 style="font-size:1.25rem">Payment receipt</h2><button class="btn sec small noprint" onclick="window.print()">Print / save as PDF</button></div>
       ${[['Receipt no.',A.receipt],['Service',`Renew visa (${VISA[A.app.visa]?.[0]||''})`],['Applicant',`${esc(A.app.given)} ${esc(A.app.surname)}`],['Application no.',A.no],['Bill ID',A.billId],['Amount',rwf(fee)],['Paid with',esc(A.method)],['Date',fmtDate(A.paidAt)]]
-        .map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`;
+        .map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`
+      : lockline('The receipt and personal details are protected.')}`;
   }
 
   h+=statusHelp;
@@ -130,6 +133,15 @@ function pay(id){
 document.addEventListener('click',e=>{
   if(e.target.closest('#payBtn')) return pay(A.method||'mtn');
   if(e.target.closest('#newBill')){ newBill(A); Store.put(A); justSubmitted=justSaved=false; render(); toast('✓ New payment code created. Your answers were kept.'); window.scrollTo(0,0); }
+  if(e.target.closest('#unlock')){
+    const wantEdit = statusOf(A)==='Payment pending';
+    flowEl().innerHTML=`${crumbs()}<div><div class="titlerow"><h1 class="step">Renew visa</h1>${tag(statusOf(A))}</div></div><div id="gate"></div>`;
+    verifyBox($('#gate'), A.app.phone, {why: wantEdit?'change your answers':'see your receipt and personal details',
+      onOk: ()=>{ if(wantEdit) location.href=`apply.html?no=${A.no}#step-4`; else render(); },
+      back:'<div><button class="btn link" id="vBack">← Back to the application</button></div>'});
+    window.scrollTo(0,0); return;
+  }
+  if(e.target.closest('#vBack')){ hideSms(); return render(); }
   if(e.target.closest('#later')){ toast(A.sms!==false?'⏰ OK. We will remind you by SMS 2 days before the deadline.':'Remember to pay before the deadline.'); }
 });
 document.addEventListener('change',e=>{
@@ -139,4 +151,4 @@ document.addEventListener('change',e=>{
 
 render();
 /* keep the countdown and status up to date */
-setInterval(()=>{ if(A && !A.paidAt && !$('.scrim')){ A=Store.get(A.no)||A; render(); } }, 60000);
+setInterval(()=>{ if(A && !A.paidAt && !$('.scrim') && !$('.verify')){ A=Store.get(A.no)||A; render(); } }, 60000);

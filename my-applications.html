@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My applications · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/fonts.css?v=3">
-<link rel="stylesheet" href="css/site.css?v=3">
-<script src="js/theme.js?v=3"></script>
+<link rel="stylesheet" href="css/fonts.css?v=5">
+<link rel="stylesheet" href="css/site.css?v=5">
+<script src="js/theme.js?v=5"></script>
 </head>
 <body data-page="mine">
 <div id="site-header"></div>
@@ -15,14 +15,15 @@
 <div class="cols">
   <div class="main">
     <div class="crumbs"><a href="index.html">Home</a><span>/</span><span>My applications</span></div>
-    <div><h1>My applications</h1><p class="lead">Applications started on this device. Each one is saved automatically.</p></div>
+    <div class="headrow" style="align-items:flex-end;margin:0"><div><h1>My applications</h1><p class="lead">Applications started on this device. Each one is saved automatically.</p></div>
+      <button class="btn sec small" id="signOut" title="Use this on a shared computer, e.g. at a cyber café or an agent">Sign out on this device</button></div>
     <div id="list" class="stack" style="gap:10px"></div>
   </div>
   <aside id="side"></aside>
 </div>
 </main>
 <div id="site-footer"></div>
-<script src="js/core.js?v=3"></script>
+<script src="js/core.js?v=5"></script>
 <script>
 $('#side').innerHTML=sidePanel(null);
 function draw(){
@@ -37,14 +38,17 @@ function draw(){
               : s==='Payment pending' ? `Pay ${rwf(feeOf(a))} before ${fmtDate(a.deadline)} · ${timeLeft(a.deadline)}`
               : s==='Payment expired' ? `Payment code expired · your application is kept`
               : `Paid ${fmtDate(a.paidAt)} · DGIE is reviewing`;
-    const act = s==='Draft' ? `<a class="btn small" href="apply.html?no=${a.no}">Continue</a><button class="btn danger small" data-del="${a.no}">Delete draft</button>`
+    const open=canAccess(a);      // locked ones show no name and need the SMS code to open
+    const act = s==='Draft' ? `<a class="btn small" href="apply.html?no=${a.no}">Continue</a>${open?`<button class="btn danger small" data-del="${a.no}">Delete draft</button>`:''}`
               : s==='Payment pending' ? `<a class="btn small" href="application.html?no=${a.no}">Pay now</a>`
               : s==='Payment expired' ? `<a class="btn small" href="application.html?no=${a.no}">Get a new payment code</a>`
               : `<a class="btn sec small" href="application.html?no=${a.no}">View</a>`;
-    return `<div class="result"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''} ${tag(s)}</span><span class="s mono">${a.no}${a.app.surname?' · '+esc(a.app.given||'')+' '+esc(a.app.surname):''}</span><span class="s">${sub}</span></span><span class="acts">${act}</span></div>`;
+    const who = open ? (a.app.surname?' · '+esc(a.app.given||'')+' '+esc(a.app.surname):'') : ' · 🔒 details need an SMS code';
+    return `<div class="result"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''} ${tag(s)}</span><span class="s mono">${a.no}${who}</span><span class="s">${sub}</span></span><span class="acts">${act}</span></div>`;
   }).join('') + `<p class="muted" style="font-size:.875rem;margin:4px 0 0">Looking for an application made somewhere else? <a href="find.html">Find application</a>.</p>`;
 }
 document.addEventListener('click',e=>{
+  if(e.target.closest('#signOut')){ signOutDevice(); hideSms(); draw(); toast('🔒 Signed out. Opening an application now needs a code sent by SMS.'); return; }
   const d=e.target.closest('[data-del]'); if(!d) return;
   const s=modal(`<h2>Delete this draft?</h2><p>Draft <b class="mono">${d.dataset.del}</b> and the answers in it will be removed from this device.</p><div class="actions"><button class="btn sec" data-close>Keep it</button><button class="btn danger" id="yesDel">Delete</button></div>`);
   s.querySelector('#yesDel').onclick=()=>{ Store.remove(d.dataset.del); s.remove(); draw(); toast('Draft deleted.'); };

@@ -396,3 +396,17 @@ footer.site img{width:16px;height:16px;filter:invert(1)}
 /* overrides that must come after the general form rules */
 .hero-search input[type=search]{border:0;box-shadow:none;background:transparent;height:46px;padding:0 12px;color:#111723}
 .hero-search input[type=search]:focus{box-shadow:none}
+
+/* ---------- access check: "Confirm it's you" + simulated SMS ---------- */
+.verify{display:flex;flex-direction:column;gap:16px}
+.verify .vh{display:flex;align-items:center;gap:12px}
+.sms{position:fixed;top:108px;right:16px;z-index:96;width:340px;max-width:calc(100vw - 32px);background:#1c1f26;color:#fff;border-radius:18px;padding:14px 16px 12px;box-shadow:0 16px 40px rgba(0,0,0,.35);font-size:.9375rem;animation:smsin .25s ease-out}
+@keyframes smsin{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
+.sms .sh{display:flex;align-items:center;gap:8px;font-size:.75rem;color:#aab3c2;margin-bottom:6px}
+.sms .sh img{width:14px;height:14px;filter:invert(1)}
+.sms .from{font-weight:700;margin-bottom:2px}
+.sms .body b{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;letter-spacing:.08em;color:#ffd166}
+.sms .note{margin-top:8px;font-size:.72rem;color:#8a93a5}
+.sms .x{position:absolute;top:8px;right:10px;background:none;border:0;color:#aab3c2;font-size:1.25rem;cursor:pointer;line-height:1}
+.lockline{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;padding:14px 18px;border-radius:12px;background:var(--surface2);color:var(--ink2)}
+.lockline img{width:18px;height:18px;filter:var(--icon-filter)}

@@ -7,7 +7,7 @@
 /* ---------- load or create the application ---------- */
 let A = param('no') && Store.get(param('no'));
 if(A && A.paidAt){ location.replace('application.html?no='+A.no); }      // paid: can no longer be edited
-if(!A){ A = {no:newAppNo(), service:'Renew visa', app:{}, photo:null, bio:null, created:Date.now(), submitted:false, sms:true, step:1}; }
+if(!A){ A = {no:newAppNo(), service:'Renew visa', app:{}, photo:null, bio:null, created:Date.now(), submitted:false, sms:true, step:1}; markOwn(A.no); }   // started here: no code needed in this session
 let stored = !!Store.get(A.no);          // saved only once the person starts answering
 let photoImg = null;                     // the real image, kept in memory for "Make it fit for me"
 
@@ -159,7 +159,7 @@ function summary(errs){
 }
 function collect(){
   $$('#main input, #main select').forEach(el=>{
-    if(el.type==='file') return;
+    if(el.type==='file' || el.closest('.verify')) return;
     if(el.type==='radio'){ if(el.checked) A.app[el.name]=el.value; }
     else if(el.type==='checkbox'){ if(el.id==='consent') A.app.consent=el.checked; }
     else A.app[el.id]=el.value.trim();
@@ -233,6 +233,12 @@ function submit(){
 /* ---------- router ---------- */
 function step(){ const m=location.hash.match(/step-(\d)/); return m ? Math.min(4,Math.max(1,+m[1])) : 1; }
 function render(){
+  if(!canAccess(A)){                        // someone else's application: prove it's yours first
+    flowEl().innerHTML=`<div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="my-applications.html">My applications</a><span>/</span><span class="mono">${A.no}</span></div>
+      <div><h1 class="step">Renew visa ${tag(statusOf(A))}</h1><p class="sublead">Application <strong class="mono">${A.no}</strong></p></div><div id="gate"></div>`;
+    verifyBox($('#gate'), A.app.phone, {why:'continue or change this application', onOk:render});
+    setSide(sidePanel(null)); document.title="Confirm it's you · IremboGov"; return;
+  }
   const n=step();
   flowEl().innerHTML=V[n]();
   setSide(sidePanel(stored?A:null));
@@ -253,15 +259,15 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   if(e.target.id==='photoIn'&&e.target.files[0]) return readPhoto(e.target.files[0]);
   if(e.target.id==='bioIn'&&e.target.files[0]) return readBio(e.target.files[0]);
-  if(e.target.closest('#main')){ const f=e.target.closest('.f.err'); if(f) f.classList.remove('err'); collect(); save(); }
+  if(e.target.closest('#main') && !e.target.closest('.verify')){ const f=e.target.closest('.f.err'); if(f) f.classList.remove('err'); collect(); save(); }
 });
 /* save while typing; clear an error while typing (not on blur: avoids the layout jump found in testing) */
 let _st;
 document.addEventListener('input',e=>{
-  if(!e.target.closest('#main') || e.target.type==='file') return;
+  if(!e.target.closest('#main') || e.target.type==='file' || e.target.closest('.verify')) return;
   const f=e.target.closest('.f.err'); if(f) f.classList.remove('err');
   clearTimeout(_st); _st=setTimeout(()=>{ collect(); save(); },400);
 });
-window.addEventListener('beforeunload',()=>{ if(stored){ collect(); A.updated=Date.now(); Store.put(A); } });
+window.addEventListener('beforeunload',()=>{ if(stored && canAccess(A)){ collect(); A.updated=Date.now(); Store.put(A); } });
 
 render();

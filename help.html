@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Help centre · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/fonts.css?v=3">
-<link rel="stylesheet" href="css/site.css?v=3">
-<script src="js/theme.js?v=3"></script>
+<link rel="stylesheet" href="css/fonts.css?v=5">
+<link rel="stylesheet" href="css/site.css?v=5">
+<script src="js/theme.js?v=5"></script>
 </head>
 <body data-page="help">
 <div id="site-header"></div>
@@ -51,7 +51,7 @@
   </section>
 </main>
 <div id="site-footer"></div>
-<script src="js/core.js?v=3"></script>
+<script src="js/core.js?v=5"></script>
 <script>
 const FAQS=[
   ['My photo is rejected. What do I do?','The check tells you exactly which rule the photo breaks (file type, size or shape). If it is a JPG, press "Make it fit for me": we cut it to a square and make it smaller. Your face is not changed.'],
@@ -59,7 +59,9 @@ const FAQS=[
   ['Which number do I need to keep?','Only your application number, e.g. B2-4832-2026. The payment code is linked to it. If you lose it, search with your phone number.'],
   ['I am not Rwandan. Do I need a National ID?','No. Your passport number is enough for immigration services.'],
   ['Someone asked me for my mobile-money PIN. Is that normal?','Never. Irembo, DGIE and agents never need your PIN. Call 9099 to report it.'],
-  ['Can I stop and continue later?','Yes. Answers save as you type. Continue from <a href="my-applications.html">My applications</a>, or from Find application with any of your numbers.']
+  ['Can I stop and continue later?','Yes. Answers save as you type. Continue from <a href="my-applications.html">My applications</a>, or from <a href="find.html">Find application</a> with your phone number. If you closed the browser, we send a code by SMS to confirm it\'s you.'],
+  ['Why do you send me a code by SMS?','Your application number appears on SMS and receipts, so other people may see it. With the number alone, anyone can only see the status or pay. To see your personal details, change your answers or list your applications, the code sent to your phone proves it\'s you. Never share this code, not even with an agent.'],
+  ['I used a computer at a cyber café or an agent. What should I do?','Before you leave, open <a href="my-applications.html">My applications</a> and press "Sign out on this device". Closing the browser also locks your applications.']
 ];
 $('#faqList').innerHTML=FAQS.map(([q,a])=>`<details class="acc" style="border-top-color:var(--line);padding:16px 0"><summary>${q}</summary><p>${a}</p></details>`).join('');
 const AGENTS=[['Kicukiro Centre','Kicukiro','KK 15 Rd, near the market','Mon–Sat 7:30–19:00'],['Remera','Gasabo','KG 11 Ave, Remera','Mon–Sat 8:00–18:00'],['Nyabugogo','Nyarugenge','Nyabugogo bus park','Mon–Sun 7:00–20:00'],['Musanze town','Musanze','Near Musanze market','Mon–Sat 8:00–18:00'],['Huye','Huye','Main road, Huye town','Mon–Sat 8:00–18:00'],['Gisenyi','Rubavu','Gisenyi town centre','Mon–Sat 8:00–18:00']];
