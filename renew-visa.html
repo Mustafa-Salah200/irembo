@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renew my visa · IremboGov</title>
+<meta name="description" content="Extend your stay in Rwanda: what you need, how much it costs and how long it takes.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="services">
+<div id="site-header"></div>
+
+<div class="wrap with-aside">
+<main id="main" tabindex="-1">
+  <div class="crumb"><a href="index.html">Home</a> › <a href="index.html#services">Immigration</a> › Renew my visa</div>
+  <h1>Renew my visa</h1>
+  <p class="lead">Extend your stay in Rwanda before your current visa ends. Your request is handled by <b>DGIE</b> (Directorate General of Immigration and Emigration).</p>
+  <div class="facts">
+    <div class="fact">Time to apply<b>about 10 minutes</b></div>
+    <div class="fact">Decision<b>usually 4 working days</b></div>
+    <div class="fact">Fee<b>20,000 – 50,000 RWF</b></div>
+  </div>
+
+  <div id="draftBox"></div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>Prepare these before you start</h2>
+    <ul class="check">
+      <li><b>Passport biodata page</b> (the page with your photo) <span class="rule">PDF file · 500 KB or smaller</span></li>
+      <li><b>A recent passport photo</b> <span class="rule">JPG file · 200 KB or smaller · square, at least 400 × 400 pixels · plain light background.<br>Too big? Don't worry: we can make it smaller for you.</span></li>
+      <li><b>Your current visa number</b> <span class="rule">Printed on your visa sticker or e-visa letter</span></li>
+      <li><b>A phone number for MTN MoMo or Airtel Money</b>, or a bank card <span class="rule">To pay the fee and receive SMS updates</span></li>
+    </ul>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn sec" id="smsList">📩 Send this list to my phone</button>
+      <button class="btn link" onclick="window.print()">🖨 Print this list</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>How much does it cost?</h2>
+    <table class="fees"><thead><tr><th>Visa type</th><th>Fee</th></tr></thead><tbody id="feeRows"></tbody></table>
+    <p class="rule">You pay only after you submit. You will see the exact amount before paying.</p>
+  </div>
+
+  <div class="card tint">
+    <h2>🔒 Your data and privacy</h2>
+    <p style="margin:0 0 6px"><b>Who sees your information?</b> Only DGIE officers who process visa requests. Irembo staff do not read your documents.</p>
+    <details><summary>Why are personal details like parents' names needed?</summary>DGIE uses them to match your request to your immigration record and to prevent identity fraud.</details>
+    <details><summary>How long is it kept?</summary>For as long as Rwandan law on immigration records requires. You can ask DGIE for a copy of your data.</details>
+  </div>
+
+  <div class="card">
+    <h2>Questions people ask</h2>
+    <details><summary>I am a foreigner. Do I need a Rwandan National ID?</summary>No. You apply with your passport or travel document.</details>
+    <details><summary>What if my payment code expires?</summary>Your application is kept. Open it and press "Get a new payment code". You do not need to apply again.</details>
+    <details><summary>Can someone apply for me?</summary>Yes. An Irembo agent can apply with you. Bring the documents listed above. <a href="help.html#agents">Find an agent</a>.</details>
+  </div>
+
+  <div class="actions"><span></span><a class="btn" href="apply.html" id="startBtn">Start application ›</a></div>
+</main>
+<aside class="side" id="side"></aside>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/core.js"></script>
+<script>
+$('#feeRows').innerHTML = Object.keys(FEES).map(k=>`<tr><td>${VISA[k][0]}</td><td><b>${rwf(FEES[k])}</b></td></tr>`).join('');
+$('#side').innerHTML = sidePanel(null);
+$('#smsList').onclick = ()=>toast('📩 SMS sent: "Renew visa – prepare: passport page (PDF), photo (JPG), visa number, MoMo/Airtel number."');
+const draft = Store.all().find(a=>!a.submitted);
+if(draft){
+  $('#draftBox').innerHTML = `<div class="alert info" style="margin-top:16px">You have an unfinished application <b class="mono">${draft.no}</b>. <a href="apply.html?no=${draft.no}">Continue it ›</a></div>`;
+}
+</script>
+</body>
+</html>

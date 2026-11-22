@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My applications · IremboGov</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="mine">
+<div id="site-header"></div>
+<div class="wrap">
+<main id="main" tabindex="-1">
+  <div class="crumb"><a href="index.html">Home</a> › My applications</div>
+  <h1>My applications</h1>
+  <p class="lead">Applications started on this device. Each one is saved automatically.</p>
+  <div id="list" class="applist"></div>
+</main>
+</div>
+<div id="site-footer"></div>
+<script src="js/core.js"></script>
+<script>
+function draw(){
+  const apps=Store.all();
+  if(!apps.length){
+    $('#list').innerHTML=`<div class="card empty"><p style="font-size:2rem;margin:0">📭</p><p><b>No applications on this device yet.</b></p><p>Applied on another phone or with an agent? <a href="find.html">Find it with your number</a>.</p><a class="btn" href="renew-visa.html">Renew my visa</a></div>`;
+    return;
+  }
+  $('#list').innerHTML=apps.map(a=>{
+    const s=statusOf(a);
+    const sub = s==='Draft' ? `Started ${fmtDate(a.created)} · not submitted`
+              : s==='Payment pending' ? `Pay ${rwf(feeOf(a))} before ${fmtDate(a.deadline)} · ${timeLeft(a.deadline)}`
+              : s==='Payment expired' ? `Payment code expired · your application is kept`
+              : `Paid ${fmtDate(a.paidAt)} · DGIE is reviewing`;
+    const act = s==='Draft' ? `<a class="btn small" href="apply.html?no=${a.no}">Continue</a><button class="btn danger small" data-del="${a.no}">Delete draft</button>`
+              : s==='Payment pending' ? `<a class="btn small" href="application.html?no=${a.no}">Pay now</a>`
+              : s==='Payment expired' ? `<a class="btn small" href="application.html?no=${a.no}">Get a new payment code</a>`
+              : `<a class="btn sec small" href="application.html?no=${a.no}">View</a>`;
+    return `<div class="appcard"><div class="main"><b>Renew visa</b> ${tag(s)}<div class="rule mono">${a.no}${a.app.surname?' · '+esc(a.app.surname)+' '+esc(a.app.given||''):''}</div><div class="rule">${sub}</div></div><div class="acts">${act}</div></div>`;
+  }).join('') + `<p class="rule">Looking for an application made somewhere else? <a href="find.html">Find application</a>.</p>`;
+}
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-del]'); if(!d) return;
+  const s=modal(`<h2>Delete this draft?</h2><p>Draft <b class="mono">${d.dataset.del}</b> and the answers in it will be removed from this device.</p><div class="actions"><button class="btn sec" data-close>Keep it</button><button class="btn danger" id="yesDel">Delete</button></div>`);
+  s.querySelector('#yesDel').onclick=()=>{ Store.remove(d.dataset.del); s.remove(); draw(); toast('Draft deleted.'); };
+});
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find my application · IremboGov</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="find">
+<div id="site-header"></div>
+<div class="wrap with-aside">
+<main id="main" tabindex="-1">
+  <div class="crumb"><a href="index.html">Home</a> › Find application</div>
+  <h1>Find my application</h1>
+  <p class="lead">No login needed. Use whichever number you have.</p>
+  <form class="card" id="findForm" novalidate>
+    <div class="f" data-f="q"><label for="q">Application number, payment code (Bill ID) <u>or</u> phone number</label>
+      <div class="hint" id="q-h">Examples: B2-4471-2026 · 880 112 345 · 0788 123 467</div>
+      <input id="q" type="text" aria-describedby="q-h q-m" autocomplete="off"><div class="msg" id="q-m"></div></div>
+    <button class="btn" type="submit">Find</button>
+  </form>
+  <div id="findRes" aria-live="polite"></div>
+  <details><summary>I lost my application number</summary>Search with the phone number you gave in the application. Your application number is also in the SMS we sent when you started.</details>
+</main>
+<aside class="side" id="side"></aside>
+</div>
+<div id="site-footer"></div>
+<script src="js/core.js"></script>
+<script>
+$('#side').innerHTML=sidePanel(null);
+function result(a){
+  const s=statusOf(a), fee=rwf(feeOf(a));
+  const what = s==='Draft' ? `Not submitted yet. Continue where you stopped.`
+             : s==='Payment pending' ? `Pay <b>${fee}</b> before <b>${fmtDate(a.deadline)}</b>, or the payment code expires (your application is kept).`
+             : s==='Payment expired' ? `The payment code expired. Your application is safe: get a new code and pay.`
+             : `Paid. DGIE is reviewing your request (usually 4 working days).`;
+  const btn = s==='Draft' ? ['Continue application',`apply.html?no=${a.no}`]
+            : s==='Payment pending' ? ['Pay now',`application.html?no=${a.no}`]
+            : s==='Payment expired' ? ['Get a new payment code',`application.html?no=${a.no}`]
+            : ['See full progress',`application.html?no=${a.no}`];
+  return `<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><h2 style="margin:0">Renew visa</h2>${tag(s)}</div>
+    <p class="rule mono">${a.no} · DGIE</p><p style="margin:6px 0">${what}</p>
+    <div class="actions" style="justify-content:flex-start"><a class="btn" href="${btn[1]}">${btn[0]} ›</a></div></div>`;
+}
+function setErr(msg){ $('[data-f=q]').classList.toggle('err',!!msg); $('#q-m').textContent=msg; }
+$('#q').addEventListener('input',()=>setErr(''));
+$('#findForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const q=$('#q').value.trim(), c=q.replace(/[\s-]/g,'').toUpperCase(), box=$('#findRes');
+  const isApp=/^B2\d{8}$/.test(c), isBill=/^88\d{7}$/.test(c), isPhone=/^(0|250|\+250)?7[2389]\d{7}$/.test(c);
+  const msg = !q ? 'Type your application number, payment code or phone number.'
+            : (isApp||isBill||isPhone) ? ''
+            : c.startsWith('B2') ? 'Application numbers look like B2-4471-2026 (B2 + 8 digits).'
+            : c.startsWith('88') ? 'Payment codes (Bill IDs) start with 88 and have 9 digits.'
+            : 'We could not recognise this. Check the examples above.';
+  setErr(msg); if(msg){ box.innerHTML=''; $('#q').focus(); return; }
+  const phone=c.replace(/^(\+?250|0)/,'');
+  const hits=Store.all().filter(a=> isApp ? a.no.replace(/-/g,'')===c : isBill ? (a.billId||'').replace(/\s/g,'')===c : a.app.phone===phone);
+  box.innerHTML = hits.length ? (hits.length>1?`<p class="rule">${hits.length} applications found.</p>`:'')+hits.map(result).join('')
+    : `<div class="alert info">No application found for <b>${esc(q)}</b>. Check the number in your SMS, or call <b>9099</b>.</div>`;
+});
+if(param('q')){ $('#q').value=param('q'); $('#findForm').requestSubmit(); }
+</script>
+</body>
+</html>

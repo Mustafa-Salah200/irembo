@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IremboGov: Government services in one place (redesign concept)</title>
+<meta name="description" content="Apply for Rwandan government services online: renew your visa, find an application, get help.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="home">
+<div id="site-header"></div>
+
+<section class="hero">
+  <div class="hero-in">
+    <h1>Government services, simply.</h1>
+    <p>Apply, pay and follow your request online, in Kinyarwanda, English or French. Need help? An Irembo agent near you can do it with you.</p>
+    <form class="search" role="search" id="svcSearch">
+      <label for="q" class="sr">Search for a service</label>
+      <input type="search" id="q" placeholder="What do you need? e.g. visa, driving licence, birth certificate" autocomplete="off">
+      <button class="btn" type="submit">Search</button>
+    </form>
+    <div class="quick">Popular: <a href="renew-visa.html">Renew my visa</a><a href="find.html">Find my application</a><a href="help.html#agents">Find an agent</a></div>
+  </div>
+</section>
+
+<div class="wrap">
+<main id="main" tabindex="-1">
+
+  <div id="continueBox"></div>
+
+  <section class="section" id="services">
+    <h2>Services</h2>
+    <p class="rule" id="svcHint" style="margin-bottom:10px">Choose a service to see what you need, how much it costs and how long it takes.</p>
+    <div class="svcs" id="svcList">
+      <a class="svc featured" href="renew-visa.html" data-k="visa renew extend stay immigration dgie permit student work"><span class="ic">🛂</span><span><b>Renew my visa <span class="new">New design</span></b><small>Immigration · DGIE · about 10 minutes</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="visa apply new immigration dgie"><span class="ic">✈️</span><span><b>Apply for a visa</b><small>Immigration · DGIE · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="passport e-passport immigration"><span class="ic">📘</span><span><b>Apply for a passport</b><small>Immigration · DGIE · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="driving licence license permit test transport police"><span class="ic">🚗</span><span><b>Driving licence test</b><small>Transport · Rwanda National Police · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="birth certificate civil status family"><span class="ic">👶</span><span><b>Birth certificate</b><small>Family · Civil registration · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="criminal record certificate police"><span class="ic">📄</span><span><b>Criminal record certificate</b><small>Justice · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="land title transfer property"><span class="ic">🏡</span><span><b>Land title transfer</b><small>Land · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="mutuelle health insurance pay"><span class="ic">🏥</span><span><b>Pay Mutuelle de santé</b><small>Health · on irembo.gov.rw ↗</small></span></a>
+      <a class="svc" href="find.html" data-k="find track status application bill id payment code"><span class="ic">🔎</span><span><b>Find my application</b><small>Status with your application number, Bill ID or phone</small></span></a>
+    </div>
+    <p class="empty" id="svcEmpty" hidden>No service found. Try another word, or call <b>9099</b>.</p>
+  </section>
+
+  <section class="section">
+    <h2>How it works</h2>
+    <div class="grid3">
+      <div class="card"><ol class="steps3"><li><b>Prepare</b><br><span class="muted">Each service lists the documents and the exact fee before you start.</span></li></ol></div>
+      <div class="card"><ol class="steps3" start="2" style="counter-reset:s 1"><li><b>Apply and pay</b><br><span class="muted">Your answers are saved as you go. Pay with MoMo, Airtel Money, card or USSD.</span></li></ol></div>
+      <div class="card"><ol class="steps3" style="counter-reset:s 2"><li><b>Follow your request</b><br><span class="muted">One number to keep: your application number. We send SMS updates.</span></li></ol></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="card tint">
+      <h2>🔒 Your data is safe with us</h2>
+      <p style="margin:0 0 6px">Only the institution that handles your request (for example DGIE for visas) can see your information. Irembo staff do not read your documents. Every form explains why each personal question is asked.</p>
+      <a href="help.html#privacy">How we use your data ›</a>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/core.js"></script>
+<script>
+/* service search (filters the list as you type) */
+const q=$('#q');
+function filter(){
+  const words=q.value.toLowerCase().trim().split(/\s+/).filter(Boolean); let shown=0;
+  $$('#svcList .svc').forEach(s=>{
+    const hay=(s.textContent+' '+s.dataset.k).toLowerCase();
+    const ok=words.every(w=>hay.includes(w)); s.hidden=!ok; if(ok) shown++;
+  });
+  $('#svcEmpty').hidden = shown>0;
+}
+q.addEventListener('input', filter);
+$('#svcSearch').addEventListener('submit', e=>{ e.preventDefault(); filter(); document.getElementById('services').scrollIntoView(); const first=$('#svcList .svc:not([hidden])'); if(first) first.focus(); });
+
+/* "continue where you left off" */
+const open=Store.all().filter(a=>statusOf(a)!=='Under review');
+if(open.length){
+  const a=open[0], s=statusOf(a);
+  const action = s==='Draft' ? ['Continue application',`apply.html?no=${a.no}`]
+               : s==='Payment expired' ? ['Get a new payment code',`application.html?no=${a.no}`]
+               : ['Pay now',`application.html?no=${a.no}`];
+  $('#continueBox').innerHTML=`<div class="card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px">
+    <div style="flex:1;min-width:220px"><div class="rule">Continue where you left off</div><b>Renew visa</b> ${tag(s)}<div class="rule mono">${a.no}</div></div>
+    <a class="btn" href="${action[1]}">${action[0]} ›</a></div>`;
+}
+</script>
+</body>
+</html>
