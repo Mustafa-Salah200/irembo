@@ -5,43 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Find my application · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/fonts.css?v=3">
+<link rel="stylesheet" href="css/site.css?v=3">
+<script src="js/theme.js?v=3"></script>
 </head>
 <body data-page="find">
 <div id="site-header"></div>
-<div class="wrap with-aside">
-<main id="main" tabindex="-1">
-  <div class="crumb"><a href="index.html">Home</a> › Find application</div>
-  <h1>Find my application</h1>
-  <p class="lead">No login needed. Use whichever number you have.</p>
-  <form class="card" id="findForm" novalidate>
-    <div class="f" data-f="q"><label for="q">Application number, payment code (Bill ID) <u>or</u> phone number</label>
-      <div class="hint" id="q-h">Examples: B2-4471-2026 · 880 112 345 · 0788 123 467</div>
-      <input id="q" type="text" aria-describedby="q-h q-m" autocomplete="off"><div class="msg" id="q-m"></div></div>
-    <button class="btn" type="submit">Find</button>
-  </form>
-  <div id="findRes" aria-live="polite"></div>
-  <details><summary>I lost my application number</summary>Search with the phone number you gave in the application. Your application number is also in the SMS we sent when you started.</details>
-</main>
-<aside class="side" id="side"></aside>
+<main id="main" tabindex="-1" class="page">
+<div class="cols">
+  <div class="main">
+    <div class="crumbs"><a href="index.html">Home</a><span>/</span><span>Find application</span></div>
+    <div><h1>Find my application</h1><p class="lead">No login needed. Use whichever number you have.</p></div>
+    <form class="card" id="findForm" novalidate>
+      <div class="f" data-f="q">
+        <label for="q" style="font-size:1.0625rem">Application number, payment code (Bill ID) or phone number</label>
+        <span class="muted" style="font-size:.875rem">Examples: <span class="mono">B2-4471-2026 · 880 112 345 · 0788 123 467</span></span>
+        <div class="findrow"><input id="q" type="text" placeholder="Type any of your numbers" aria-describedby="q-m" autocomplete="off">
+          <button class="btn" type="submit"><img class="ic onbrand" src="assets/icons/search.svg" alt="">Find</button></div>
+        <div class="msg" id="q-m"></div>
+      </div>
+    </form>
+    <div id="findRes" class="stack" style="gap:10px" aria-live="polite"></div>
+    <details class="acc card tight" style="padding:18px 22px"><summary style="color:var(--brand-text)">I lost my application number</summary><p>Search with the phone number you used. You can also call 9099 or visit an Irembo agent with your passport.</p></details>
+  </div>
+  <aside id="side"></aside>
 </div>
+</main>
 <div id="site-footer"></div>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
 $('#side').innerHTML=sidePanel(null);
 function result(a){
-  const s=statusOf(a), fee=rwf(feeOf(a));
+  const s=statusOf(a), fee=rwf(feeOf(a)), v=VISA[a.app.visa];
   const what = s==='Draft' ? `Not submitted yet. Continue where you stopped.`
-             : s==='Payment pending' ? `Pay <b>${fee}</b> before <b>${fmtDate(a.deadline)}</b>, or the payment code expires (your application is kept).`
+             : s==='Payment pending' ? `Pay ${fee} before ${fmtDate(a.deadline)}. If the code expires, your application is kept.`
              : s==='Payment expired' ? `The payment code expired. Your application is safe: get a new code and pay.`
              : `Paid. DGIE is reviewing your request (usually 4 working days).`;
-  const btn = s==='Draft' ? ['Continue application',`apply.html?no=${a.no}`]
-            : s==='Payment pending' ? ['Pay now',`application.html?no=${a.no}`]
-            : s==='Payment expired' ? ['Get a new payment code',`application.html?no=${a.no}`]
-            : ['See full progress',`application.html?no=${a.no}`];
-  return `<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><h2 style="margin:0">Renew visa</h2>${tag(s)}</div>
-    <p class="rule mono">${a.no} · DGIE</p><p style="margin:6px 0">${what}</p>
-    <div class="actions" style="justify-content:flex-start"><a class="btn" href="${btn[1]}">${btn[0]} ›</a></div></div>`;
+  const href = s==='Draft' ? `apply.html?no=${a.no}` : `application.html?no=${a.no}`;
+  const go = s==='Draft' ? 'Continue →' : s==='Payment pending' ? 'Pay now →' : s==='Payment expired' ? 'Get a new code →' : 'Open →';
+  return `<a class="result" href="${href}"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''}</span><span class="s mono">${a.no}</span><span class="s" style="margin-top:4px">${what}</span></span>${tag(s)}<span class="go">${go}</span></a>`;
 }
 function setErr(msg){ $('[data-f=q]').classList.toggle('err',!!msg); $('#q-m').textContent=msg; }
 $('#q').addEventListener('input',()=>setErr(''));
@@ -57,8 +59,8 @@ $('#findForm').addEventListener('submit',e=>{
   setErr(msg); if(msg){ box.innerHTML=''; $('#q').focus(); return; }
   const phone=c.replace(/^(\+?250|0)/,'');
   const hits=Store.all().filter(a=> isApp ? a.no.replace(/-/g,'')===c : isBill ? (a.billId||'').replace(/\s/g,'')===c : a.app.phone===phone);
-  box.innerHTML = hits.length ? (hits.length>1?`<p class="rule">${hits.length} applications found.</p>`:'')+hits.map(result).join('')
-    : `<div class="alert info">No application found for <b>${esc(q)}</b>. Check the number in your SMS, or call <b>9099</b>.</div>`;
+  box.innerHTML = hits.length ? `<div class="muted" style="font-size:.875rem">${hits.length} application${hits.length>1?'s':''} found</div>`+hits.map(result).join('')
+    : `<div class="infobox">No application found for <strong>${esc(q)}</strong>. Check the number in your SMS, or call <strong>9099</strong>.</div>`;
 });
 if(param('q')){ $('#q').value=param('q'); $('#findForm').requestSubmit(); }
 </script>

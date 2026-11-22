@@ -6,72 +6,83 @@
 <title>Renew my visa · IremboGov</title>
 <meta name="description" content="Extend your stay in Rwanda: what you need, how much it costs and how long it takes.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/fonts.css?v=3">
+<link rel="stylesheet" href="css/site.css?v=3">
+<script src="js/theme.js?v=3"></script>
 </head>
 <body data-page="services">
 <div id="site-header"></div>
 
-<div class="wrap with-aside">
-<main id="main" tabindex="-1">
-  <div class="crumb"><a href="index.html">Home</a> › <a href="index.html#services">Immigration</a> › Renew my visa</div>
-  <h1>Renew my visa</h1>
-  <p class="lead">Extend your stay in Rwanda before your current visa ends. Your request is handled by <b>DGIE</b> (Directorate General of Immigration and Emigration).</p>
-  <div class="facts">
-    <div class="fact">Time to apply<b>about 10 minutes</b></div>
-    <div class="fact">Decision<b>usually 4 working days</b></div>
-    <div class="fact">Fee<b>20,000 – 50,000 RWF</b></div>
-  </div>
-
-  <div id="draftBox"></div>
-
-  <div class="card" style="margin-top:20px">
-    <h2>Prepare these before you start</h2>
-    <ul class="check">
-      <li><b>Passport biodata page</b> (the page with your photo) <span class="rule">PDF file · 500 KB or smaller</span></li>
-      <li><b>A recent passport photo</b> <span class="rule">JPG file · 200 KB or smaller · square, at least 400 × 400 pixels · plain light background.<br>Too big? Don't worry: we can make it smaller for you.</span></li>
-      <li><b>Your current visa number</b> <span class="rule">Printed on your visa sticker or e-visa letter</span></li>
-      <li><b>A phone number for MTN MoMo or Airtel Money</b>, or a bank card <span class="rule">To pay the fee and receive SMS updates</span></li>
-    </ul>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn sec" id="smsList">📩 Send this list to my phone</button>
-      <button class="btn link" onclick="window.print()">🖨 Print this list</button>
+<main id="main" tabindex="-1" class="page">
+<div class="cols">
+  <div class="main">
+    <div class="crumbs"><a href="index.html">Home</a><span>/</span><span>Immigration</span><span>/</span><span>Renew my visa</span></div>
+    <div>
+      <h1>Renew my visa</h1>
+      <p class="lead">Extend your stay in Rwanda before your current visa ends. Your request is handled by <strong style="color:var(--ink)">DGIE</strong>, the Directorate General of Immigration and Emigration.</p>
     </div>
-  </div>
+    <div class="facts">
+      <div><div class="k">Time to apply</div><div class="v">About 10 min</div></div>
+      <div><div class="k">Decision</div><div class="v">~4 working days</div></div>
+      <div><div class="k">Fee</div><div class="v">20,000 – 50,000 RWF</div></div>
+    </div>
+    <div id="draftBox" hidden></div>
 
-  <div class="card">
-    <h2>How much does it cost?</h2>
-    <table class="fees"><thead><tr><th>Visa type</th><th>Fee</th></tr></thead><tbody id="feeRows"></tbody></table>
-    <p class="rule">You pay only after you submit. You will see the exact amount before paying.</p>
-  </div>
+    <div class="card">
+      <div class="headrow"><h2>Prepare these before you start</h2><span class="muted" style="font-size:.875rem" id="prepCount"></span></div>
+      <p style="margin:0;color:var(--ink3);font-size:.875rem">Tick them off as you gather them.</p>
+      <div class="prep" id="prepList"></div>
+      <button class="btn sec small noprint" style="margin-top:8px" onclick="window.print()">Print this list</button>
+    </div>
 
-  <div class="card tint">
-    <h2>🔒 Your data and privacy</h2>
-    <p style="margin:0 0 6px"><b>Who sees your information?</b> Only DGIE officers who process visa requests. Irembo staff do not read your documents.</p>
-    <details><summary>Why are personal details like parents' names needed?</summary>DGIE uses them to match your request to your immigration record and to prevent identity fraud.</details>
-    <details><summary>How long is it kept?</summary>For as long as Rwandan law on immigration records requires. You can ask DGIE for a copy of your data.</details>
-  </div>
+    <div class="card">
+      <h2>How much does it cost?</h2>
+      <div id="feeRows"></div>
+      <p class="note">You pay only after you submit, and you see the exact amount first. <i>Sample fees for this concept: the real fees must come from DGIE.</i></p>
+    </div>
 
-  <div class="card">
-    <h2>Questions people ask</h2>
-    <details><summary>I am a foreigner. Do I need a Rwandan National ID?</summary>No. You apply with your passport or travel document.</details>
-    <details><summary>What if my payment code expires?</summary>Your application is kept. Open it and press "Get a new payment code". You do not need to apply again.</details>
-    <details><summary>Can someone apply for me?</summary>Yes. An Irembo agent can apply with you. Bring the documents listed above. <a href="help.html#agents">Find an agent</a>.</details>
-  </div>
+    <div class="card soft">
+      <h2 style="margin-bottom:10px">Your data and privacy</h2>
+      <p style="margin:0 0 14px;color:var(--ink2)"><strong style="color:var(--ink)">Who sees your information?</strong> Only DGIE officers who process visa requests. Irembo staff do not read your documents.</p>
+      <details class="acc link"><summary>Why are personal details like parents' names needed?</summary><p>They help DGIE match your request to your immigration record and prevent identity fraud.</p></details>
+      <details class="acc link"><summary>How long is it kept?</summary><p>As long as the law requires for immigration records. You can ask DGIE for a copy of your data.</p></details>
+      <p class="note" style="margin-top:6px"><i>Proposed wording. The final text must follow the official DGIE / Irembo privacy policy.</i></p>
+    </div>
 
-  <div class="actions"><span></span><a class="btn" href="apply.html" id="startBtn">Start application ›</a></div>
-</main>
-<aside class="side" id="side"></aside>
+    <div class="card">
+      <h2 style="margin-bottom:8px">Questions people ask</h2>
+      <details class="acc"><summary>I am a foreigner. Do I need a Rwandan National ID?</summary><p>No. Your passport number is enough.</p></details>
+      <details class="acc"><summary>What if my payment code expires?</summary><p>Open your application and press "Get a new payment code". You don't need to apply again.</p></details>
+      <details class="acc" style="padding-bottom:0"><summary>Can someone apply for me?</summary><p>Yes. An Irembo agent can apply with you. Bring your documents. <a href="help.html#agents">Find an agent</a>.</p></details>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end"><a class="btn big" href="apply.html" id="startBtn">Start application →</a></div>
+  </div>
+  <aside id="side"></aside>
 </div>
+</main>
 
 <div id="site-footer"></div>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
-$('#feeRows').innerHTML = Object.keys(FEES).map(k=>`<tr><td>${VISA[k][0]}</td><td><b>${rwf(FEES[k])}</b></td></tr>`).join('');
+$('#feeRows').innerHTML = Object.keys(FEES).map(k=>`<div class="feerow"><span>${VISA[k][0]}</span><strong>${rwf(FEES[k])}</strong></div>`).join('');
 $('#side').innerHTML = sidePanel(null);
-$('#smsList').onclick = ()=>toast('📩 SMS sent: "Renew visa – prepare: passport page (PDF), photo (JPG), visa number, MoMo/Airtel number."');
+
+/* tick-off checklist, remembered on this device */
+const PREP=[['Passport biodata page','The page with your photo · PDF, 500 KB or smaller'],['A recent passport photo','JPG · 200 KB or smaller · square, at least 400 × 400 px · plain light background. Too big? We can make it smaller for you.'],['Your current visa number','Printed on your visa sticker or e-visa letter'],['A MoMo / Airtel Money phone, or a bank card','To pay the fee and receive SMS updates']];
+const PKEY='irembo-prep-visa';
+let ticks; try{ ticks=JSON.parse(localStorage.getItem(PKEY))||{}; }catch(e){ ticks={}; }
+function drawPrep(){
+  $('#prepList').innerHTML=PREP.map(([t,h],i)=>`<button type="button" data-i="${i}" class="${ticks[i]?'on':''}" aria-pressed="${!!ticks[i]}"><span class="box">${ticks[i]?'✓':''}</span><span><span class="t">${t}</span><span class="h">${h}</span></span></button>`).join('');
+  $('#prepCount').textContent=`${PREP.filter((_,i)=>ticks[i]).length} of ${PREP.length} ready`;
+}
+$('#prepList').addEventListener('click',e=>{ const b=e.target.closest('[data-i]'); if(!b) return; ticks[b.dataset.i]=!ticks[b.dataset.i]; localStorage.setItem(PKEY,JSON.stringify(ticks)); drawPrep(); });
+drawPrep();
+
 const draft = Store.all().find(a=>!a.submitted);
 if(draft){
-  $('#draftBox').innerHTML = `<div class="alert info" style="margin-top:16px">You have an unfinished application <b class="mono">${draft.no}</b>. <a href="apply.html?no=${draft.no}">Continue it ›</a></div>`;
+  const d=$('#draftBox'); d.hidden=false; d.className='banner';
+  d.innerHTML=`<span>You have an unfinished application <strong class="mono">${draft.no}</strong></span><a href="apply.html?no=${draft.no}">Continue it →</a>`;
 }
 </script>
 </body>

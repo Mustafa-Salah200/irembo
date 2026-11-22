@@ -6,92 +6,105 @@
 <title>IremboGov: Government services in one place (redesign concept)</title>
 <meta name="description" content="Apply for Rwandan government services online: renew your visa, find an application, get help.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/fonts.css?v=3">
+<link rel="stylesheet" href="css/site.css?v=3">
+<script src="js/theme.js?v=3"></script>
 </head>
 <body data-page="home">
 <div id="site-header"></div>
 
-<section class="hero">
-  <div class="hero-in">
-    <h1>Government services, simply.</h1>
-    <p>Apply, pay and follow your request online, in Kinyarwanda, English or French. Need help? An Irembo agent near you can do it with you.</p>
-    <form class="search" role="search" id="svcSearch">
-      <label for="q" class="sr">Search for a service</label>
-      <input type="search" id="q" placeholder="What do you need? e.g. visa, driving licence, birth certificate" autocomplete="off">
-      <button class="btn" type="submit">Search</button>
-    </form>
-    <div class="quick">Popular: <a href="renew-visa.html">Renew my visa</a><a href="find.html">Find my application</a><a href="help.html#agents">Find an agent</a></div>
-  </div>
-</section>
-
-<div class="wrap">
-<main id="main" tabindex="-1">
-
-  <div id="continueBox"></div>
-
-  <section class="section" id="services">
-    <h2>Services</h2>
-    <p class="rule" id="svcHint" style="margin-bottom:10px">Choose a service to see what you need, how much it costs and how long it takes.</p>
-    <div class="svcs" id="svcList">
-      <a class="svc featured" href="renew-visa.html" data-k="visa renew extend stay immigration dgie permit student work"><span class="ic">🛂</span><span><b>Renew my visa <span class="new">New design</span></b><small>Immigration · DGIE · about 10 minutes</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="visa apply new immigration dgie"><span class="ic">✈️</span><span><b>Apply for a visa</b><small>Immigration · DGIE · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="passport e-passport immigration"><span class="ic">📘</span><span><b>Apply for a passport</b><small>Immigration · DGIE · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="driving licence license permit test transport police"><span class="ic">🚗</span><span><b>Driving licence test</b><small>Transport · Rwanda National Police · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="birth certificate civil status family"><span class="ic">👶</span><span><b>Birth certificate</b><small>Family · Civil registration · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="criminal record certificate police"><span class="ic">📄</span><span><b>Criminal record certificate</b><small>Justice · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="land title transfer property"><span class="ic">🏡</span><span><b>Land title transfer</b><small>Land · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="https://irembo.gov.rw" rel="noopener" data-k="mutuelle health insurance pay"><span class="ic">🏥</span><span><b>Pay Mutuelle de santé</b><small>Health · on irembo.gov.rw ↗</small></span></a>
-      <a class="svc" href="find.html" data-k="find track status application bill id payment code"><span class="ic">🔎</span><span><b>Find my application</b><small>Status with your application number, Bill ID or phone</small></span></a>
+<main id="main" tabindex="-1" class="page">
+  <section class="hero">
+    <div style="flex:1 1 480px;min-width:0">
+      <div class="kicker">Republic of Rwanda · e-services</div>
+      <h1>Government services, simply.</h1>
+      <p>Apply, pay and follow your request online in Kinyarwanda, English or French. Prefer help in person? An Irembo agent near you can do it with you.</p>
+      <form class="hero-search" role="search" id="svcSearch">
+        <img src="assets/icons/search.svg" alt="">
+        <label for="q" class="sr">Search for a service</label>
+        <input type="search" id="q" placeholder="What do you need? e.g. visa, driving licence" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <div class="chips-pop"><span>Popular</span><a href="renew-visa.html">Renew my visa</a><a href="find.html">Find my application</a><a href="help.html#agents">Find an agent</a></div>
     </div>
+    <div class="cont" id="continueBox"></div>
+  </section>
+
+  <section id="services">
+    <div class="sec-title"><h2>Services</h2><p>See what you need, what it costs and how long it takes, before you start.</p></div>
+    <div class="svcs" id="svcList"></div>
     <p class="empty" id="svcEmpty" hidden>No service found. Try another word, or call <b>9099</b>.</p>
   </section>
 
-  <section class="section">
-    <h2>How it works</h2>
-    <div class="grid3">
-      <div class="card"><ol class="steps3"><li><b>Prepare</b><br><span class="muted">Each service lists the documents and the exact fee before you start.</span></li></ol></div>
-      <div class="card"><ol class="steps3" start="2" style="counter-reset:s 1"><li><b>Apply and pay</b><br><span class="muted">Your answers are saved as you go. Pay with MoMo, Airtel Money, card or USSD.</span></li></ol></div>
-      <div class="card"><ol class="steps3" style="counter-reset:s 2"><li><b>Follow your request</b><br><span class="muted">One number to keep: your application number. We send SMS updates.</span></li></ol></div>
+  <section>
+    <div class="sec-title" style="margin-top:64px"><h2>How it works</h2></div>
+    <div class="how">
+      <div><div class="n">01</div><div class="t">Prepare</div><p>Every service lists the documents and the exact fee before you start.</p></div>
+      <div><div class="n">02</div><div class="t">Apply and pay</div><p>Answers save as you go. Pay with MTN MoMo, Airtel Money, card or USSD.</p></div>
+      <div><div class="n">03</div><div class="t">Follow your request</div><p>Keep one number, your application number. We send SMS updates at every step.</p></div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="card tint">
-      <h2>🔒 Your data is safe with us</h2>
-      <p style="margin:0 0 6px">Only the institution that handles your request (for example DGIE for visas) can see your information. Irembo staff do not read your documents. Every form explains why each personal question is asked.</p>
-      <a href="help.html#privacy">How we use your data ›</a>
-    </div>
+  <section class="band">
+    <span class="tile"><img src="assets/icons/lock.svg" alt=""></span>
+    <div class="txt"><h3>Your data is safe with us</h3>
+      <p>Only the institution that handles your request (for example DGIE for visas) can see your information. Irembo staff do not read your documents, and every form explains why each personal question is asked.</p></div>
+    <a class="btn sec" href="help.html#privacy">How we use your data</a>
   </section>
-
 </main>
-</div>
 
 <div id="site-footer"></div>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
-/* service search (filters the list as you type) */
+/* services (only "Renew my visa" and "Find" are part of this redesign; the others open the current irembo.gov.rw) */
+const SERVICES=[
+  ['id-card','Renew my visa','Immigration · DGIE · about 10 minutes','renew-visa.html',true,'visa renew extend stay immigration dgie permit student work'],
+  ['globe','Apply for a visa','Immigration · DGIE','',false,'visa apply new immigration'],
+  ['id-badge','Apply for a passport','Immigration · DGIE','',false,'passport e-passport immigration'],
+  ['traffic','Driving licence test','Transport · Rwanda National Police','',false,'driving licence license permit test police'],
+  ['users','Birth certificate','Family · Civil registration','',false,'birth certificate civil status family'],
+  ['file','Criminal record certificate','Justice','',false,'criminal record certificate police'],
+  ['map','Land title transfer','Land','',false,'land title transfer property'],
+  ['medical','Pay Mutuelle de santé','Health','',false,'mutuelle health insurance pay'],
+  ['search2','Find my application','Application number, Bill ID or phone','find.html',false,'find track status application bill id payment code']
+];
+$('#svcList').innerHTML=SERVICES.map(([ic,name,meta,href,isNew,k])=>{
+  const ext=!href;
+  return `<a class="svc${isNew?' featured':''}" href="${ext?'https://irembo.gov.rw':href}"${ext?' rel="noopener"':''} data-k="${k}">
+    <span class="tile"><img src="assets/icons/${ic}.svg" alt=""></span>
+    <span class="txt"><span class="name">${name}${isNew?'<span class="newtag">New design</span>':''}</span><span class="meta">${meta}${ext?' · on irembo.gov.rw':''}</span></span>
+    <span class="arrow">${ext?'↗':'→'}</span></a>`;
+}).join('');
+
 const q=$('#q');
 function filter(){
   const words=q.value.toLowerCase().trim().split(/\s+/).filter(Boolean); let shown=0;
-  $$('#svcList .svc').forEach(s=>{
-    const hay=(s.textContent+' '+s.dataset.k).toLowerCase();
-    const ok=words.every(w=>hay.includes(w)); s.hidden=!ok; if(ok) shown++;
-  });
+  $$('#svcList .svc').forEach(s=>{ const hay=(s.textContent+' '+s.dataset.k).toLowerCase(); const ok=words.every(w=>hay.includes(w)); s.hidden=!ok; if(ok) shown++; });
   $('#svcEmpty').hidden = shown>0;
 }
 q.addEventListener('input', filter);
-$('#svcSearch').addEventListener('submit', e=>{ e.preventDefault(); filter(); document.getElementById('services').scrollIntoView(); const first=$('#svcList .svc:not([hidden])'); if(first) first.focus(); });
+$('#svcSearch').addEventListener('submit', e=>{ e.preventDefault(); filter(); $('#services').scrollIntoView(); $('#svcList .svc:not([hidden])')?.focus(); });
 
-/* "continue where you left off" */
+/* "Continue where you left off": the most recent application that still needs something */
 const open=Store.all().filter(a=>statusOf(a)!=='Under review');
+const box=$('#continueBox');
 if(open.length){
   const a=open[0], s=statusOf(a);
-  const action = s==='Draft' ? ['Continue application',`apply.html?no=${a.no}`]
-               : s==='Payment expired' ? ['Get a new payment code',`application.html?no=${a.no}`]
-               : ['Pay now',`application.html?no=${a.no}`];
-  $('#continueBox').innerHTML=`<div class="card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:6px">
-    <div style="flex:1;min-width:220px"><div class="rule">Continue where you left off</div><b>Renew visa</b> ${tag(s)}<div class="rule mono">${a.no}</div></div>
-    <a class="btn" href="${action[1]}">${action[0]} ›</a></div>`;
+  const step = s==='Draft' ? (a.step||1) : 5;
+  const label = s==='Draft' ? `Draft · step ${step} of 5` : s;
+  const go = s==='Draft' ? ['Continue application →',`apply.html?no=${a.no}`]
+           : s==='Payment expired' ? ['Get a new payment code →',`application.html?no=${a.no}`]
+           : ['Pay now →',`application.html?no=${a.no}`];
+  box.innerHTML=`<div class="lbl">Continue where you left off</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:1.2rem;font-weight:700">Renew visa</span><span class="pill" style="background:rgba(255,255,255,.14);color:#fff">${label}</span></div>
+    <div class="no">${a.no}</div>
+    <div class="bar"><div style="width:${((step-1)/5*100+8)}%"></div></div>
+    <a class="go" href="${go[1]}">${go[0]}</a>`;
+} else {
+  box.innerHTML=`<div class="lbl">New: the redesigned service</div>
+    <div style="font-size:1.2rem;font-weight:700;margin-bottom:4px">Renew my visa</div>
+    <div style="color:#d4dcee;font-size:.9375rem;margin-bottom:18px">See the documents and the exact fee first. About 10 minutes.</div>
+    <a class="go" href="renew-visa.html">Get started →</a>`;
 }
 </script>
 </body>

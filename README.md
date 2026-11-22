@@ -16,7 +16,13 @@ Double-click **`index.html`**. It works offline. To put it online, upload the wh
 | `my-applications.html` | All applications on this device: continue, pay, new code, delete draft |
 | `help.html` | Call 9099, FAQ, agent finder by district, privacy |
 
-Shared: `css/site.css`, `js/core.js` (header, footer, storage, Aa+ / contrast remembered across pages, help button).
+Shared: `css/site.css` (design v2), `css/fonts.css`, `js/theme.js` (applies light/dark + text size before the page draws), `js/core.js` (header, footer, storage, Aa+ / Dark mode remembered across pages, help button).
+
+## Design v2 (from the `irembogov-redesign` export, 22 Nov 2026)
+The visual design (Public Sans, light/dark theme, rounded cards, tick-off checklist, method cards) comes from the `irembogov-redesign` design export. It was applied to these working pages, so every function still works. The export itself was only a click-through mock: its uploads, validation, Find and payment were fake and its application number was fixed.
+- **Works offline:** the fonts (`assets/fonts/`, SIL Open Font License) and icons (`assets/icons/`) are stored in the project. The export loaded them from the internet.
+- **Icons:** Dazzle Line Icons by Dazzle UI (CC BY). Keep the attribution in the footer.
+- **Paying:** choose a method card, then press "Pay … RWF".
 
 ## How data works
 Applications are stored in the browser (`localStorage`) and never sent anywhere. Statuses use the team vocabulary: Draft → Payment pending → Payment expired / Under review.

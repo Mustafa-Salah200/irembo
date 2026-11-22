@@ -5,30 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My applications · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/fonts.css?v=3">
+<link rel="stylesheet" href="css/site.css?v=3">
+<script src="js/theme.js?v=3"></script>
 </head>
 <body data-page="mine">
 <div id="site-header"></div>
-<div class="wrap">
-<main id="main" tabindex="-1">
-  <div class="crumb"><a href="index.html">Home</a> › My applications</div>
-  <h1>My applications</h1>
-  <p class="lead">Applications started on this device. Each one is saved automatically.</p>
-  <div id="list" class="applist"></div>
-</main>
+<main id="main" tabindex="-1" class="page">
+<div class="cols">
+  <div class="main">
+    <div class="crumbs"><a href="index.html">Home</a><span>/</span><span>My applications</span></div>
+    <div><h1>My applications</h1><p class="lead">Applications started on this device. Each one is saved automatically.</p></div>
+    <div id="list" class="stack" style="gap:10px"></div>
+  </div>
+  <aside id="side"></aside>
 </div>
+</main>
 <div id="site-footer"></div>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
+$('#side').innerHTML=sidePanel(null);
 function draw(){
   const apps=Store.all();
   if(!apps.length){
-    $('#list').innerHTML=`<div class="card empty"><p style="font-size:2rem;margin:0">📭</p><p><b>No applications on this device yet.</b></p><p>Applied on another phone or with an agent? <a href="find.html">Find it with your number</a>.</p><a class="btn" href="renew-visa.html">Renew my visa</a></div>`;
+    $('#list').innerHTML=`<div class="card empty"><p style="margin:0 0 6px;font-weight:700;color:var(--ink);font-size:1.125rem">No applications on this device yet.</p><p>Applied on another phone or with an agent? <a href="find.html">Find it with your number</a>.</p><a class="btn" href="renew-visa.html">Renew my visa</a></div>`;
     return;
   }
   $('#list').innerHTML=apps.map(a=>{
-    const s=statusOf(a);
-    const sub = s==='Draft' ? `Started ${fmtDate(a.created)} · not submitted`
+    const s=statusOf(a), v=VISA[a.app.visa];
+    const sub = s==='Draft' ? `Started ${fmtDate(a.created)} · step ${a.step||1} of 5`
               : s==='Payment pending' ? `Pay ${rwf(feeOf(a))} before ${fmtDate(a.deadline)} · ${timeLeft(a.deadline)}`
               : s==='Payment expired' ? `Payment code expired · your application is kept`
               : `Paid ${fmtDate(a.paidAt)} · DGIE is reviewing`;
@@ -36,8 +41,8 @@ function draw(){
               : s==='Payment pending' ? `<a class="btn small" href="application.html?no=${a.no}">Pay now</a>`
               : s==='Payment expired' ? `<a class="btn small" href="application.html?no=${a.no}">Get a new payment code</a>`
               : `<a class="btn sec small" href="application.html?no=${a.no}">View</a>`;
-    return `<div class="appcard"><div class="main"><b>Renew visa</b> ${tag(s)}<div class="rule mono">${a.no}${a.app.surname?' · '+esc(a.app.surname)+' '+esc(a.app.given||''):''}</div><div class="rule">${sub}</div></div><div class="acts">${act}</div></div>`;
-  }).join('') + `<p class="rule">Looking for an application made somewhere else? <a href="find.html">Find application</a>.</p>`;
+    return `<div class="result"><span class="main"><span class="t">Renew visa${v?' · '+v[0]:''} ${tag(s)}</span><span class="s mono">${a.no}${a.app.surname?' · '+esc(a.app.given||'')+' '+esc(a.app.surname):''}</span><span class="s">${sub}</span></span><span class="acts">${act}</span></div>`;
+  }).join('') + `<p class="muted" style="font-size:.875rem;margin:4px 0 0">Looking for an application made somewhere else? <a href="find.html">Find application</a>.</p>`;
 }
 document.addEventListener('click',e=>{
   const d=e.target.closest('[data-del]'); if(!d) return;

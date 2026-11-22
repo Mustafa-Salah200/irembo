@@ -5,58 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Help centre · IremboGov</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/fonts.css?v=3">
+<link rel="stylesheet" href="css/site.css?v=3">
+<script src="js/theme.js?v=3"></script>
 </head>
 <body data-page="help">
 <div id="site-header"></div>
-<div class="wrap">
-<main id="main" tabindex="-1">
-  <div class="crumb"><a href="index.html">Home</a> › Help</div>
-  <h1>How can we help?</h1>
-  <p class="lead">Call us, visit an agent, or find your answer below. Help is available in Kinyarwanda, English and French.</p>
-
-  <div class="grid3">
-    <div class="card"><h2>📞 Call 9099</h2><p style="margin:0">Free call from MTN and Airtel.<br>Monday – Saturday, 7:00 – 21:00.</p></div>
-    <div class="card"><h2>🧑‍💼 Visit an agent</h2><p style="margin:0">An Irembo agent can apply with you. Bring your documents. <a href="#agents">Find an agent ›</a></p></div>
-    <div class="card"><h2>🔎 Follow a request</h2><p style="margin:0">Use your application number, payment code or phone. <a href="find.html">Find application ›</a></p></div>
+<main id="main" tabindex="-1" class="page" style="display:flex;flex-direction:column;gap:48px">
+  <div>
+    <div class="crumbs" style="margin-bottom:12px"><a href="index.html">Home</a><span>/</span><span>Help</span></div>
+    <h1>How can we help?</h1>
+    <p class="lead" style="margin-bottom:24px">Call us, visit an agent, or find your answer below. Help is available in Kinyarwanda, English and French.</p>
+    <div class="helpcards">
+      <div class="helpcard"><div class="hd"><span class="tile36"><img src="assets/icons/phone.svg" alt=""></span><span class="kick">Call</span></div><div class="big">9099</div><p>Free from MTN and Airtel. Mon–Sat, 7:00–21:00.</p></div>
+      <a class="helpcard" href="#agents"><div class="hd"><span class="tile36"><img src="assets/icons/agent.svg" alt=""></span><span class="kick">Visit</span></div><div class="mid">An Irembo agent</div><p>An agent can apply with you. Bring your documents.</p></a>
+      <a class="helpcard" href="find.html"><div class="hd"><span class="tile36"><img src="assets/icons/search.svg" alt=""></span><span class="kick">Follow</span></div><div class="mid">A request →</div><p>Use your application number, payment code or phone.</p></a>
+    </div>
   </div>
 
-  <section class="section" id="faq">
-    <h2>Common questions</h2>
-    <details><summary>My photo is rejected. What do I do?</summary>The upload page shows which rule the photo breaks (file type, size or shape). If it is a JPG, press <b>"Make it fit for me"</b>: we cut it to a square and make it smaller. Your face is not changed.</details>
-    <details><summary>My payment code (Bill ID) expired. Do I need to apply again?</summary>No. Open your application (from <a href="my-applications.html">My applications</a> or <a href="find.html">Find application</a>) and press <b>"Get a new payment code"</b>. Your answers and documents are kept.</details>
-    <details><summary>Which number do I need to keep?</summary>Only your <b>application number</b> (it starts with B2). The payment code is linked to it. If you lose it, search with your phone number.</details>
-    <details><summary>I am not Rwandan. Do I need a National ID?</summary>No. Foreign residents apply with a passport or travel document.</details>
-    <details><summary>Someone asked me for my mobile-money PIN. Is that normal?</summary><b>No.</b> Irembo and government staff will never ask for your PIN. Only type it on your own phone when you approve a payment. Report it by calling 9099.</details>
-    <details><summary>Can I stop and continue later?</summary>Yes. Your answers are saved as you type. Come back from <a href="my-applications.html">My applications</a>.</details>
-  </section>
+  <div class="two-col">
+    <section id="faq">
+      <h2>Common questions</h2>
+      <div id="faqList"></div>
+    </section>
+    <section id="agents">
+      <div class="headrow" style="margin-bottom:14px;align-items:flex-end">
+        <h2 style="margin:0">Find an Irembo agent</h2>
+        <label class="sr" for="dist">District</label>
+        <select id="dist" style="width:auto;height:42px"><option value="">All districts</option><option>Kicukiro</option><option>Gasabo</option><option>Nyarugenge</option><option>Musanze</option><option>Huye</option><option>Rubavu</option></select>
+      </div>
+      <div class="agents" id="agentList"></div>
+      <p class="note" style="font-size:.8125rem">Sample list for this concept: agent names, addresses and hours are made up. A real version would load Irembo's official agent register.</p>
+    </section>
+  </div>
 
-  <section class="section" id="agents">
-    <h2>Find an Irembo agent</h2>
-    <div class="f" style="max-width:420px"><label for="dist">Your district</label>
-      <select id="dist"><option value="">All districts</option><option>Gasabo</option><option>Kicukiro</option><option>Nyarugenge</option><option>Musanze</option><option>Huye</option><option>Rubavu</option></select></div>
-    <div id="agentList" class="applist"></div>
-    <p class="rule">Sample agent list.</p>
-  </section>
-
-  <section class="section" id="privacy">
-    <div class="card tint">
-      <h2>🔒 Privacy: how your data is used</h2>
-      <p><b>Who sees it?</b> Only the institution that handles your request. For visas, that is DGIE officers. Irembo staff do not read your documents.</p>
-      <p><b>Why do we ask personal questions?</b> Each form explains why. For example, parents' names help DGIE match your request to your immigration record and prevent identity fraud.</p>
-      <p><b>How long is it kept?</b> As long as the law for that type of record requires. You can ask the institution for a copy of your data.</p>
-      <p style="margin-bottom:0"><b>Payments:</b> Card details go directly to your bank. Mobile-money payments are approved with your PIN on your own phone. Nobody else needs your PIN.</p>
+  <section class="privacy" id="privacy">
+    <h2>Privacy: how your data is used</h2>
+    <div class="grid">
+      <div><div class="hd"><span class="tile36"><img src="assets/icons/eye.svg" alt=""></span>Who sees it?</div><p>Only the institution handling your request. For visas, that is DGIE officers. Irembo staff do not read your documents.</p></div>
+      <div><div class="hd"><span class="tile36"><img src="assets/icons/question.svg" alt=""></span>Why personal questions?</div><p>Each form explains why. Parents' names help DGIE match your immigration record and prevent fraud.</p></div>
+      <div><div class="hd"><span class="tile36"><img src="assets/icons/clock.svg" alt=""></span>How long is it kept?</div><p>As long as the law requires for that record. You can ask the institution for a copy.</p></div>
+      <div><div class="hd"><span class="tile36"><img src="assets/icons/wallet.svg" alt=""></span>Payments</div><p>Card details go to your bank. Mobile money is approved with your PIN on your own phone. Nobody else needs it.</p></div>
     </div>
+    <p class="note" style="margin-top:20px"><i>Proposed wording for this redesign concept. The final text must follow the official Irembo / DGIE privacy policy.</i></p>
   </section>
 </main>
-</div>
 <div id="site-footer"></div>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3"></script>
 <script>
-const AGENTS=[['Kicukiro Centre agent','Kicukiro','KK 15 Rd, near the market','Mon–Sat 7:30–19:00'],['Remera agent','Gasabo','KG 11 Ave, Remera','Mon–Sat 8:00–18:00'],['Nyabugogo agent','Nyarugenge','Nyabugogo bus park','Mon–Sun 7:00–20:00'],['Musanze town agent','Musanze','Near Musanze market','Mon–Sat 8:00–18:00'],['Huye agent','Huye','Main road, Huye town','Mon–Sat 8:00–18:00'],['Gisenyi agent','Rubavu','Gisenyi town centre','Mon–Sat 8:00–18:00']];
+const FAQS=[
+  ['My photo is rejected. What do I do?','The check tells you exactly which rule the photo breaks (file type, size or shape). If it is a JPG, press "Make it fit for me": we cut it to a square and make it smaller. Your face is not changed.'],
+  ['My payment code (Bill ID) expired. Do I need to apply again?','No. Open your application from <a href="my-applications.html">My applications</a> or <a href="find.html">Find application</a> and press "Get a new payment code". Your answers are kept.'],
+  ['Which number do I need to keep?','Only your application number, e.g. B2-4832-2026. The payment code is linked to it. If you lose it, search with your phone number.'],
+  ['I am not Rwandan. Do I need a National ID?','No. Your passport number is enough for immigration services.'],
+  ['Someone asked me for my mobile-money PIN. Is that normal?','Never. Irembo, DGIE and agents never need your PIN. Call 9099 to report it.'],
+  ['Can I stop and continue later?','Yes. Answers save as you type. Continue from <a href="my-applications.html">My applications</a>, or from Find application with any of your numbers.']
+];
+$('#faqList').innerHTML=FAQS.map(([q,a])=>`<details class="acc" style="border-top-color:var(--line);padding:16px 0"><summary>${q}</summary><p>${a}</p></details>`).join('');
+const AGENTS=[['Kicukiro Centre','Kicukiro','KK 15 Rd, near the market','Mon–Sat 7:30–19:00'],['Remera','Gasabo','KG 11 Ave, Remera','Mon–Sat 8:00–18:00'],['Nyabugogo','Nyarugenge','Nyabugogo bus park','Mon–Sun 7:00–20:00'],['Musanze town','Musanze','Near Musanze market','Mon–Sat 8:00–18:00'],['Huye','Huye','Main road, Huye town','Mon–Sat 8:00–18:00'],['Gisenyi','Rubavu','Gisenyi town centre','Mon–Sat 8:00–18:00']];
 function drawAgents(){
   const d=$('#dist').value;
-  $('#agentList').innerHTML=AGENTS.filter(a=>!d||a[1]===d).map(a=>`<div class="appcard"><div class="main"><b>${a[0]}</b><div class="rule">${a[1]} · ${a[2]}</div><div class="rule">${a[3]}</div></div></div>`).join('');
+  $('#agentList').innerHTML=AGENTS.filter(a=>!d||a[1]===d).map(a=>`<div class="agent"><div><div class="n">${a[0]}</div><div class="a">${a[1]} · ${a[2]}</div></div><div class="h">${a[3]}</div></div>`).join('');
 }
 $('#dist').onchange=drawAgents; drawAgents();
 </script>

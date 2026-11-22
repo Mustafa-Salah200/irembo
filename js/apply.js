@@ -7,134 +7,147 @@
 /* ---------- load or create the application ---------- */
 let A = param('no') && Store.get(param('no'));
 if(A && A.paidAt){ location.replace('application.html?no='+A.no); }      // paid: can no longer be edited
-if(!A){ A = {no:newAppNo(), service:'Renew visa', app:{}, photo:null, bio:null, created:Date.now(), submitted:false, sms:true}; }
-let stored = !!Store.get(A.no);          // saved only once the person starts typing
+if(!A){ A = {no:newAppNo(), service:'Renew visa', app:{}, photo:null, bio:null, created:Date.now(), submitted:false, sms:true, step:1}; }
+let stored = !!Store.get(A.no);          // saved only once the person starts answering
 let photoImg = null;                     // the real image, kept in memory for "Make it fit for me"
 
 function save(){
   A.updated=Date.now(); Store.put(A);
   if(!stored){ stored=true; history.replaceState(null,'',`apply.html?no=${A.no}${location.hash}`); }
-  const s=$('#savedMsg'); if(s){ s.innerHTML=`✓ Saved automatically · Application number <b>${A.no}</b>, keep only this number`; }
+  const s=$('#savedMsg'); if(s) s.textContent='✓ Saved automatically';
+  setSide(sidePanel(A));
 }
 
 /* ---------- pieces ---------- */
 function stepper(n){
-  return `<p class="stepcount">Step ${n} of 5 · <b>${STEPS[n-1]}</b></p>
-  <ol class="stepper" aria-label="Progress">${STEPS.map((s,i)=>`<li class="${i+1<n?'done':i+1===n?'cur':''}" ${i+1===n?'aria-current="step"':''}><div class="bar"></div><span>${s}</span></li>`).join('')}</ol>
-  <p class="saved" id="savedMsg" role="status">${stored?`✓ Saved automatically · Application number <b>${A.no}</b>, keep only this number`:`Your application number: <b>${A.no}</b>. Your answers are saved as you type.`}</p>`;
+  return `<div>
+    <div class="stephead"><span class="muted">Step ${n} of 5 · <strong style="color:var(--ink)">${STEPS[n-1]}</strong></span><span class="saved" id="savedMsg" role="status">${stored?'✓ Saved automatically':'Your answers save as you type'}</span></div>
+    <ol class="stepbar" aria-label="Progress">${STEPS.map((s,i)=>{ const k=i+1, cls=k<n?'done':k===n?'cur':'';
+      const inner=`<span class="bar"></span><span class="lbl">${k<n?'✓ ':''}${s}</span>`;
+      return `<li class="${cls}">${k<n?`<a href="#step-${k}" class="${cls}">${inner}</a>`:`<span class="s ${cls}"${k===n?' aria-current="step"':''}>${inner}</span>`}</li>`; }).join('')}</ol>
+  </div>`;
 }
 function field(id,label,{hint='',type='text',req=true,msg='',opts=null,why=''}={}){
   const v=esc(A.app[id]??'');
   const input = opts
-    ? `<select id="${id}" name="${id}" aria-describedby="${id}-h ${id}-m"><option value="">Choose…</option>${opts.map(o=>`<option value="${esc(o[0])}" ${A.app[id]===o[0]?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`
-    : `<input id="${id}" name="${id}" type="${type}" value="${v}" aria-describedby="${id}-h ${id}-m" autocomplete="off">`;
-  return `<div class="f" data-f="${id}"><label for="${id}">${label}${req?'':' <span class="rule" style="display:inline">(optional)</span>'}</label>
-    ${hint?`<div class="hint" id="${id}-h">${hint}</div>`:''}${input}<div class="msg" id="${id}-m">${msg}</div>
-    ${why?`<details><summary>Why do we ask this?</summary>${why}</details>`:''}</div>`;
+    ? `<select id="${id}" name="${id}" aria-describedby="${id}-m"><option value="">Choose…</option>${opts.map(o=>`<option value="${esc(o[0])}" ${A.app[id]===o[0]?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`
+    : `<input id="${id}" name="${id}" type="${type}" value="${v}" aria-describedby="${id}-m" autocomplete="off">`;
+  return `<div class="f" data-f="${id}"><label for="${id}">${label}${hint?` <span class="hint">· ${hint}</span>`:''}${req?'':' <span class="hint">· optional</span>'}</label>
+    ${input}<div class="msg" id="${id}-m">${msg}</div>
+    ${why?`<details class="why"><summary>Why do we ask this?</summary><p>${why}</p></details>`:''}</div>`;
 }
+const actions = (back, nextLabel, n) => `<div class="actions">${back}<div class="right"><button class="btn" data-next="${n}">${nextLabel}</button></div></div>`;
 
 /* ---------- steps ---------- */
 const V={};
 V[1] = () => `
-  <div class="crumb"><a href="index.html">Home</a> › <a href="renew-visa.html">Renew my visa</a> › Apply</div>
+  <div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="renew-visa.html">Renew my visa</a><span>/</span><span>Apply</span></div>
   ${stepper(1)}
-  <h1>Your visa</h1>
+  <div><h1 class="step">Your visa</h1><p class="sublead">Which visa are you renewing?</p></div>
   <div id="es"></div>
-  <fieldset class="f" data-f="visa"><legend>Which visa are you renewing?</legend>
-    <div class="opts two">${Object.keys(VISA).map(k=>`<label class="opt"><input type="radio" name="visa" value="${k}" ${A.app.visa===k?'checked':''}><span><b>${VISA[k][0]}</b><small>${VISA[k][1]}</small><small>Fee: ${rwf(FEES[k])}</small></span></label>`).join('')}</div>
+  <fieldset class="f" data-f="visa"><legend class="sr">Which visa are you renewing?</legend>
+    <div class="optgrid">${Object.keys(VISA).map(k=>`<label class="opt"><input type="radio" name="visa" value="${k}" ${A.app.visa===k?'checked':''}><span class="radio"></span><span class="ot"><span class="on">${VISA[k][0]}</span><span class="od">${VISA[k][1]}</span><span class="of">Fee ${rwf(FEES[k])}</span></span></label>`).join('')}</div>
     <div class="msg">Choose the type of visa you have now.</div>
   </fieldset>
-  <div class="grid2">
+  <div class="grid-auto">
     ${field('nationality','Nationality',{opts:[['Sudan','Sudanese'],['DRC','Congolese (DRC)'],['Burundi','Burundian'],['Kenya','Kenyan'],['Uganda','Ugandan'],['Tanzania','Tanzanian'],['Nigeria','Nigerian'],['India','Indian'],['China','Chinese'],['Other','Other…']],msg:'Choose your nationality.'})}
-    ${field('doctype','Travel document',{hint:'Most people use their passport.',opts:Object.entries(DOCTYPE),msg:'Choose your travel document.'})}
+    ${field('doctype','Travel document',{hint:'most people use their passport',opts:Object.entries(DOCTYPE),msg:'Choose your travel document.'})}
   </div>
-  <div class="actions"><a class="btn sec" href="renew-visa.html">‹ Back</a><button class="btn" data-next="1">Continue ›</button></div>`;
+  ${actions('<a class="btn sec" href="renew-visa.html">← Back</a>','Continue →',1)}`;
 
 V[2] = () => `
   ${stepper(2)}
-  <h1>About you</h1>
-  <p class="lead">Write your names exactly as they appear in your passport.</p>
+  <div><h1 class="step">About you</h1><p class="sublead">Write your names exactly as they appear in your passport.</p></div>
   <div id="es"></div>
-  <div class="grid2">
-    ${field('surname','Family name (surname)',{hint:'Example: HASSAN',msg:'Enter your family name as written in your passport.'})}
-    ${field('given','Given names (first and middle names)',{hint:'Example: Amina',msg:'Enter your given names as written in your passport.'})}
+  <div class="grid-auto">
+    ${field('surname','Family name',{hint:'e.g. HASSAN',msg:'Enter your family name as written in your passport.'})}
+    ${field('given','Given names',{hint:'e.g. Amina',msg:'Enter your given names as written in your passport.'})}
     ${field('dob','Date of birth',{type:'date',msg:'Enter your date of birth.'})}
-    <fieldset class="f" data-f="gender"><legend>Sex (as in passport)</legend>
-      <div class="opts two"><label class="opt"><input type="radio" name="gender" value="f" ${A.app.gender==='f'?'checked':''}><span>Female</span></label><label class="opt"><input type="radio" name="gender" value="m" ${A.app.gender==='m'?'checked':''}><span>Male</span></label></div>
+    <fieldset class="f" data-f="gender"><legend>Sex <span class="hint">· as in passport</span></legend>
+      <div class="seg2"><label class="opt"><input type="radio" name="gender" value="f" ${A.app.gender==='f'?'checked':''}>Female</label><label class="opt"><input type="radio" name="gender" value="m" ${A.app.gender==='m'?'checked':''}>Male</label></div>
       <div class="msg">Choose the sex shown in your passport.</div></fieldset>
   </div>
-  <div class="card tint" style="padding:12px 16px">
-    <h3>Family details</h3>
-    <div class="grid2">
+  <div class="panel">
+    <div class="t">Family details</div>
+    <div class="grid-auto">
       ${field('father',"Father's full name",{msg:"Enter your father's full name. Write \"Unknown\" if you don't know it."})}
       ${field('mother',"Mother's full name",{msg:"Enter your mother's full name. Write \"Unknown\" if you don't know it."})}
     </div>
-    <details><summary>Why do we ask for your parents' names?</summary>DGIE uses them to confirm your identity against immigration records, the same as at a border post. They are <b>only</b> seen by DGIE officers. If you don't know a name, write "Unknown". Your application will not be refused for this.</details>
-    ${field('civil','Marital status',{opts:[['single','Single'],['married','Married'],['divorced','Divorced'],['widowed','Widowed']],msg:'Choose your marital status.',why:'Some visa types (for example Dependant) depend on your family situation.'})}
+    <details class="why"><summary>Why do we ask for your parents' names?</summary><p>They help DGIE match your request to your immigration record and prevent identity fraud. Only DGIE sees them. If you don't know a name, write "Unknown": your application will not be refused for this.</p></details>
+    <div style="max-width:420px">${field('civil','Marital status',{opts:[['single','Single'],['married','Married'],['divorced','Divorced'],['widowed','Widowed']],msg:'Choose your marital status.',why:'Some visa types (for example Dependant) depend on your family situation.'})}</div>
   </div>
-  <div class="grid2">
-    ${field('job','What do you do?',{hint:'Your job or main activity, e.g. Student, Teacher, Trader',msg:'Tell us your job or main activity.'})}
+  <div class="grid-auto">
+    ${field('job','What do you do?',{hint:'e.g. Student',msg:'Tell us your job or main activity.'})}
     ${field('district','Where do you live in Rwanda?',{opts:[['Gasabo','Gasabo (Kigali)'],['Kicukiro','Kicukiro (Kigali)'],['Nyarugenge','Nyarugenge (Kigali)'],['Musanze','Musanze'],['Huye','Huye'],['Rubavu','Rubavu'],['Rusizi','Rusizi'],['Other','Other district']],msg:'Choose your district.'})}
-    <div class="f" data-f="phone"><label for="phone">Phone number for SMS updates</label><div class="hint" id="phone-h">Rwandan number, 9 digits after +250</div>
-      <div style="display:flex;gap:6px"><span class="prefix">+250</span><input id="phone" type="tel" inputmode="numeric" value="${esc(A.app.phone??'')}" aria-describedby="phone-h phone-m" autocomplete="tel-national"></div>
+    <div class="f" data-f="phone"><label for="phone">Phone for SMS updates</label>
+      <span class="prefixed"><span>+250</span><input id="phone" type="tel" inputmode="numeric" placeholder="78 812 3467" value="${esc(A.app.phone??'')}" aria-describedby="phone-m" autocomplete="tel-national"></span>
       <div class="msg" id="phone-m">Enter 9 digits, e.g. 788 123 456 (without the first 0).</div></div>
-    ${field('email','Email',{type:'email',req:false,hint:'Only if you want a copy by email'})}
+    ${field('email','Email',{type:'email',req:false})}
   </div>
-  <div class="actions"><a class="btn sec" href="#step-1">‹ Back</a><button class="btn" data-next="2">Continue ›</button></div>`;
+  ${actions('<a class="btn sec" href="#step-1">← Back</a>','Continue →',2)}`;
 
+/* documents: each rule is checked on the real file */
+function chip(state, text){ return `<span class="chip ${state}">${state==='y'?'✓':state==='n'?'✕':'○'} ${text}</span>`; }
 function photoCard(){
   const p=A.photo, st=!p?'':(p.ok?'good':'bad');
-  const r=(c,t)=>`<li class="${!p?'p':c?'y':'n'}">${t}</li>`;
+  const c=(ok,txt)=>chip(!p?'':ok?'y':'n',txt);
   const canFix = p && !p.ok && p.typeOk && photoImg;
   const thumb = p && (p.url || (photoImg && p.tmpUrl));
-  return `<div class="up ${st}" id="photoCard"><h3>1. Passport photo</h3>
-  <div class="up-row"><div class="thumb" style="${thumb?`background-image:url(&quot;${thumb}&quot;)`:''}">${thumb?'':p?'📷':'No photo yet'}</div>
-  <div style="flex:1;min-width:200px">
-    <ul class="rules" aria-live="polite">
-      ${r(p&&p.typeOk, p&&!p.typeOk?`File type is <b>${esc(p.ext)}</b>. It must be <b>JPG</b>`:'JPG file')}
-      ${r(p&&p.sizeOk, p&&!p.sizeOk?`File is <b>${p.sizeTxt}</b>. It must be <b>200 KB or smaller</b>`:`200 KB or smaller${p?` (${p.sizeTxt})`:''}`)}
-      ${r(p&&p.dimOk,  p&&!p.dimOk?`Photo is <b>${p.w||'?'} × ${p.h||'?'}</b> px. It must be <b>square</b>, at least 400 × 400`:`Square, at least 400 × 400 px${p&&p.w?` (${p.w} × ${p.h})`:''}`)}
-    </ul>
-    ${p&&!p.ok?`<div class="fix" role="alert"><b>This photo can't be used yet.</b> ${canFix?`We can fix it for you: we cut it to a square around the centre and make the file smaller. <b>Your face is not changed.</b>`:p.typeOk?`Choose the photo again and we can fix it for you.`:`Please choose a JPG photo, or take a new one with your phone camera.`}</div>`:''}
-    ${p&&p.ok?`<div class="okbox">✓ Photo accepted${p.fixed?' (made smaller for you)':''}</div>`:''}
-    <div class="upbtns">
-      ${canFix?`<button class="btn" data-act="fixphoto">Make it fit for me</button>`:''}
-      <span class="btn ${canFix||(p&&p.ok)?'sec':''} filebtn">${p?'Choose another photo':'Choose photo'}<input type="file" id="photoIn" accept=".jpg,.jpeg,image/jpeg" aria-label="Choose passport photo"></span>
-    </div>
-  </div></div></div>`;
+  return `<div class="doc ${st}" id="photoCard">
+    <div class="tile" style="${thumb?`background-image:url(&quot;${thumb}&quot;)`:''}">${thumb?'':`${ICO(p?'photo':'photo')}${p?(p.ok?'✓ Accepted':'Not accepted'):'No file yet'}`}</div>
+    <div class="body">
+      <div class="title">1. Passport photo</div>
+      <div class="chips" aria-live="polite">
+        ${c(p&&p.typeOk, p&&!p.typeOk?`File is ${esc(p.ext)}: must be JPG`:'JPG file')}
+        ${c(p&&p.sizeOk, p&&!p.sizeOk?`${p.sizeTxt}: must be 200 KB or smaller`:`200 KB or smaller${p?` (${p.sizeTxt})`:''}`)}
+        ${c(p&&p.dimOk,  p&&!p.dimOk?`${p.w||'?'} × ${p.h||'?'} px: must be square, ≥ 400 × 400`:`Square, ≥ 400 × 400 px${p&&p.w?` (${p.w} × ${p.h})`:''}`)}
+      </div>
+      ${p&&!p.ok?`<div class="fix" role="alert"><b>This photo can't be used yet.</b> ${canFix?`We can fix it for you: we cut it to a square around the centre and make the file smaller. <b>Your face is not changed.</b>`:p.typeOk?`Choose the photo again and we can fix it for you.`:`Please choose a JPG photo, or take a new one with your phone camera.`}</div>`:''}
+      ${p&&p.ok?`<div class="okline">✓ Photo accepted${p.fixed?' (made smaller for you)':''}</div>`:''}
+      <div class="upbtns">
+        ${canFix?`<button class="btn small" data-act="fixphoto">Make it fit for me</button>`:''}
+        <span class="btn small ${canFix||(p&&p.ok)?'sec':''} filebtn">${p?'Choose another photo':'Choose photo'}<input type="file" id="photoIn" accept=".jpg,.jpeg,image/jpeg" aria-label="Choose passport photo"></span>
+      </div>
+    </div></div>`;
 }
 function bioCard(){
   const b=A.bio, st=!b?'':(b.ok?'good':'bad');
-  const r=(c,t)=>`<li class="${!b?'p':c?'y':'n'}">${t}</li>`;
-  return `<div class="up ${st}" id="bioCard"><h3>2. Passport biodata page</h3>
-  <div class="up-row"><div class="thumb tall">${b?'📄 '+esc(b.name):'No file yet'}</div><div style="flex:1;min-width:200px">
-    <ul class="rules">${r(b&&b.typeOk, b&&!b.typeOk?`File type is <b>${esc(b.ext)}</b>. It must be a <b>PDF</b>. Tip: scan it with your phone's "Scan document" function`:'PDF file')}
-    ${r(b&&b.sizeOk, b&&!b.sizeOk?`File is <b>${b.sizeTxt}</b>. It must be <b>500 KB or smaller</b>`:`500 KB or smaller${b?` (${b.sizeTxt})`:''}`)}</ul>
-    ${b&&b.ok?`<div class="okbox">✓ Document accepted</div>`:''}
-    <div class="upbtns"><span class="btn ${b&&b.ok?'sec':''} filebtn">${b?'Replace file':'Choose file'}<input type="file" id="bioIn" accept=".pdf,application/pdf" aria-label="Choose passport biodata page"></span></div>
-  </div></div></div>`;
+  const c=(ok,txt)=>chip(!b?'':ok?'y':'n',txt);
+  return `<div class="doc ${st}" id="bioCard">
+    <div class="tile">${ICO(b&&b.ok?'doc-ok':'file')}${b?(b.ok?'✓ Accepted':'Not accepted'):'No file yet'}</div>
+    <div class="body">
+      <div class="title">2. Passport biodata page</div>
+      <div class="chips">
+        ${c(b&&b.typeOk, b&&!b.typeOk?`File is ${esc(b.ext)}: must be PDF`:'PDF file')}
+        ${c(b&&b.sizeOk, b&&!b.sizeOk?`${b.sizeTxt}: must be 500 KB or smaller`:`500 KB or smaller${b?` (${b.sizeTxt})`:''}`)}
+      </div>
+      ${b?`<div class="file">${esc(b.name)}</div>`:''}
+      ${b&&!b.typeOk?`<div class="fix" role="alert"><b>This must be a PDF.</b> Tip: scan the page with your phone's "Scan document" function.</div>`:''}
+      ${b&&b.typeOk&&!b.sizeOk?`<div class="fix" role="alert"><b>This file is too big.</b> Scan it again in black and white, or at a lower quality.</div>`:''}
+      <div class="upbtns"><span class="btn small ${b&&b.ok?'sec':''} filebtn">${b?'Replace':'Choose file'}<input type="file" id="bioIn" accept=".pdf,application/pdf" aria-label="Choose passport biodata page"></span></div>
+    </div></div>`;
 }
 V[3] = () => {
   const missing=[!(A.photo&&A.photo.ok)&&'Passport photo', !(A.bio&&A.bio.ok)&&'Passport biodata page'].filter(Boolean);
-  return `${stepper(3)}<h1>Documents</h1>
-  <p class="lead">We check each file as soon as you choose it, so you know straight away if it can be used.</p>
+  return `${stepper(3)}
+  <div><h1 class="step">Documents</h1><p class="sublead">We check each file the moment you choose it, so you know straight away if it can be used.</p></div>
   ${photoCard()}${bioCard()}
-  ${missing.length ? `<div class="alert warn" id="missingBox" tabindex="-1">⚠ Still missing: <b>${missing.join(', ')}</b> · <a href="#" data-act="jump">jump to it</a></div>`
-                   : `<div class="alert ok">✓ All documents are ready.</div>`}
-  <div class="actions"><a class="btn sec" href="#step-2">‹ Back</a><button class="btn" data-next="3">Continue ›</button></div>`;
+  ${missing.length ? `<div class="warnbox" id="missingBox" tabindex="-1">Still missing: ${missing.join(', ')} · <a href="#" data-act="jump">jump to it</a></div>`
+                   : `<div class="okbox"><strong>✓ All documents are ready.</strong></div>`}
+  ${actions('<a class="btn sec" href="#step-2">← Back</a>','Continue →',3)}`;
 };
 V[4] = () => {
   const a=A.app, vt=VISA[a.visa]||['—'];
-  const sec=(t,n,rows)=>`<div class="sumsec"><div class="h"><h3>${t}</h3><a href="#step-${n}" aria-label="Edit ${t}">Edit</a></div><dl>${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])||'<i>—</i>'}</dd>`).join('')}</dl></div>`;
-  return `${stepper(4)}<h1>Check your answers</h1>
-  <p class="lead">Please check everything. You can change any part with "Edit".</p>
+  const sec=(t,n,rows)=>`<div class="card tight rev"><div class="head"><h2>${t}</h2><a href="#step-${n}" aria-label="Edit ${t}">Edit</a></div>${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span class="v">${esc(r[1])||'—'}</span></div>`).join('')}</div>`;
+  return `${stepper(4)}
+  <div><h1 class="step">Check your answers</h1><p class="sublead">Look everything over. You can change any part.</p></div>
   <div id="es"></div>
   ${sec('Your visa',1,[['Request','Renew visa'],['Visa type',vt[0]],['Fee',a.visa?rwf(FEES[a.visa]):''],['Nationality',a.nationality],['Travel document',DOCTYPE[a.doctype]]])}
-  ${sec('About you',2,[['Name',`${a.surname||''} ${a.given||''}`],['Date of birth',a.dob?fmtDate(a.dob+'T12:00',false):''],['Parents',`${a.father||''} · ${a.mother||''}`],['Marital status',a.civil],['Activity',a.job],['District',a.district],['Phone (SMS)',maskPhone(a.phone)],['Email',a.email]])}
+  ${sec('About you',2,[['Name',`${a.given||''} ${a.surname||''}`.trim()],['Date of birth',a.dob?fmtDate(a.dob+'T12:00',false):''],['Sex',{f:'Female',m:'Male'}[a.gender]],['Parents',[a.father,a.mother].filter(Boolean).join(' · ')],['Marital status',{single:'Single',married:'Married',divorced:'Divorced',widowed:'Widowed'}[a.civil]],['Activity',a.job],['District',a.district],['Phone (SMS)',maskPhone(a.phone)],['Email',a.email]])}
   ${sec('Documents',3,[['Passport photo',A.photo&&A.photo.ok?'✓ Accepted':'Missing'],['Biodata page',A.bio&&A.bio.ok?'✓ Accepted':'Missing']])}
-  <div class="consent f" data-f="consent"><label><input type="checkbox" id="consent" ${A.app.consent?'checked':''}><span>The information I gave is <b>true</b>. I agree that <b>DGIE</b> may use it <b>only</b> to process this visa request.</span></label><div class="msg">Please tick the box to confirm before submitting.</div></div>
-  <p class="rule" style="margin-top:12px">You can still change your answers until DGIE starts the review.</p>
-  <div class="actions"><a class="btn sec" href="#step-3">‹ Back</a><button class="btn" data-next="4">${A.submitted?'Save changes ›':'Submit application ›'}</button></div>`;
+  <div class="f" data-f="consent"><label class="check"><input type="checkbox" id="consent" ${A.app.consent?'checked':''}><span class="box"></span><span>The information I gave is <strong>true</strong>. I agree that <strong>DGIE</strong> may use it <strong>only</strong> to process this visa request.</span></label><div class="msg">Please tick the box to confirm before submitting.</div></div>
+  <p style="margin:0;font-size:.875rem;color:var(--ink3)">You can still change your answers until DGIE starts the review.</p>
+  ${actions('<a class="btn sec" href="#step-3">← Back</a>', A.submitted?'Save changes':'Submit application', 4)}`;
 };
 
 /* ---------- validation ---------- */
@@ -167,11 +180,11 @@ function validate(n){
   if(n===2 && A.app.email && !/^\S+@\S+\.\S+$/.test(A.app.email)){ setErr('email',true,'Enter an email like name@example.com, or leave it empty.'); errs.push(['email','Check your email address']); }
   if(n===3){
     const miss=[!(A.photo&&A.photo.ok)&&'Passport photo', !(A.bio&&A.bio.ok)&&'Passport biodata page'].filter(Boolean);
-    if(miss.length){ const mb=$('#missingBox'); if(mb){ mb.className='alert bad'; mb.focus(); } toast('Still missing: '+miss.join(' · ')); return false; }
+    if(miss.length){ const mb=$('#missingBox'); if(mb){ mb.className='warnbox bad'; mb.focus(); } toast('Still missing: '+miss.join(' · ')); return false; }
   }
   if(n===4){
     const bad=!A.app.consent; setErr('consent',bad); if(bad) errs.push(['consent','Tick the box to confirm your information']);
-    for(let k=1;k<=3;k++){ if(k<3 && NEED[k].some(([id])=>!A.app[id])){ errs.push(['step-'+k,`Complete step ${k}: ${STEPS[k-1]}`]); } }
+    for(let k=1;k<=2;k++){ if(NEED[k].some(([id])=>!A.app[id])) errs.push(['step-'+k,`Complete step ${k}: ${STEPS[k-1]}`]); }
     if(!(A.photo&&A.photo.ok&&A.bio&&A.bio.ok)) errs.push(['step-3','Complete step 3: Documents']);
   }
   summary(errs); return errs.length===0;
@@ -211,7 +224,7 @@ function readBio(file){
 /* ---------- submit ---------- */
 function submit(){
   const first=!A.submitted;
-  A.submitted=true; if(first) A.submittedAt=Date.now();
+  A.submitted=true; A.step=5; if(first) A.submittedAt=Date.now();
   if(!A.billId || Date.now()>A.deadline) newBill(A);
   save();
   location.href=`application.html?no=${A.no}${first?'&new=1':'&saved=1'}`;
@@ -220,9 +233,11 @@ function submit(){
 /* ---------- router ---------- */
 function step(){ const m=location.hash.match(/step-(\d)/); return m ? Math.min(4,Math.max(1,+m[1])) : 1; }
 function render(){
-  $('#main').innerHTML=V[step()]();
-  $('#side').innerHTML=sidePanel(stored?A:null);
-  document.title=`${STEPS[step()-1]} · Renew my visa · IremboGov`;
+  const n=step();
+  flowEl().innerHTML=V[n]();
+  setSide(sidePanel(stored?A:null));
+  document.title=`${STEPS[n-1]} · Renew my visa · IremboGov`;
+  if(stored && !A.submitted && A.step!==n){ A.step=n; Store.put(A); }
 }
 window.addEventListener('hashchange',()=>{ render(); window.scrollTo(0,0); $('#main').focus({preventScroll:true}); });
 
